@@ -223,6 +223,7 @@ table.card td:last-child { text-align: right; font-weight: 700; }
   }
 </script>
 <script src="pieces-data.js"></script>
+<script src="peerjs.min.js"></script>
 <script>
 "use strict";
 // ---------------------------------------------------------------------------
@@ -2296,9 +2297,12 @@ const Net = {
   native: !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.net),
   loop: location.hash === "#loopback" && "BroadcastChannel" in window,
   role: null, connected: false, peerName: "", rooms: [], remoteInput: [0, 0], lastState: null, sendT: 0,
-  get available() { return this.native || this.loop; },
+  transport: "nearby", // "nearby" (iPads next to each other) or "online" (far-away friends)
+  get available() { return this.native || this.loop || onlineCapable(); },
   post(op, extra = {}) {
-    if (this.native) window.webkit.messageHandlers.net.postMessage({ op, ...extra });
+    if (op === "stop") { if (this.native) window.webkit.messageHandlers.net.postMessage({ op }); if (this.loop) loopPost(op, extra); onlinePost(op, extra); return; }
+    if (this.transport === "online") onlinePost(op, extra);
+    else if (this.native) window.webkit.messageHandlers.net.postMessage({ op, ...extra });
     else if (this.loop) loopPost(op, extra);
   },
   send(msg, reliable = true) { if (this.connected) this.post("send", { data: JSON.stringify(msg), reliable }); },
@@ -2331,6 +2335,50 @@ function loopPost(op, x) {
   else if (op === "stop") { if (loopPeer) loopBC.postMessage({ k: "bye", from: loopId, to: loopPeer }); loopPeer = null; clearInterval(loopAdvert); loopAdvert = null; }
 }
 
+// --- Online transport (far-away friends): WebRTC through PeerJS. The free PeerJS server only introduces
+// the two devices (by room code); game data then flows directly device-to-device, encrypted.
+const ONLINE_PREFIX = "toyboxarena-";
+const Online = { peer: null, conn: null };
+const onlineCapable = () => typeof window.Peer === "function" && "RTCPeerConnection" in window;
+function onlineSetup(c) {
+  Online.conn = c;
+  c.on("open", () => c.send({ k: "hello", name: Net.myName || nameOrDefault() }));
+  c.on("data", (d) => {
+    if (!d || typeof d !== "object") return;
+    if (d.k === "hello") netEvent({ type: "peer", state: "connected", name: String(d.name || "Friend").slice(0, 20) });
+    else if (d.k === "data") netEvent({ type: "msg", data: d.data });
+  });
+  c.on("close", () => { if (Online.conn === c) { Online.conn = null; netEvent({ type: "peer", state: "notConnected", name: "" }); } });
+  c.on("error", () => {});
+}
+function onlineError(e) {
+  const t = e && e.type;
+  const text = t === "peer-unavailable" ? "No game with that code. Check the letters and make sure your friend is still hosting."
+    : t === "unavailable-id" ? "That code is taken. Tap Cancel and host again for a new one."
+    : t === "network" || t === "server-error" || t === "socket-error" ? "Can't reach the internet. Check Wi-Fi and try again."
+    : t === "browser-incompatible" ? "This browser can't play online. Try Safari or Chrome."
+    : "Couldn't connect. Try again.";
+  netEvent({ type: "error", text });
+}
+function onlinePost(op, x) {
+  if (op === "host") {
+    Online.peer = new Peer(ONLINE_PREFIX + x.code.toLowerCase());
+    Online.peer.on("connection", (c) => { if (Online.conn) { c.close(); return; } onlineSetup(c); }); // one friend at a time
+    Online.peer.on("error", onlineError);
+  } else if (op === "join") {
+    Online.peer = new Peer();
+    Online.peer.on("open", () => onlineSetup(Online.peer.connect(ONLINE_PREFIX + x.id.toLowerCase(), { reliable: true })));
+    Online.peer.on("error", onlineError);
+  } else if (op === "send") {
+    if (Online.conn && Online.conn.open) Online.conn.send({ k: "data", data: x.data });
+  } else if (op === "stop") {
+    const c = Online.conn; Online.conn = null;
+    try { if (c) c.close(); } catch (e) {}
+    try { if (Online.peer) Online.peer.destroy(); } catch (e) {}
+    Online.peer = null;
+  }
+}
+
 function netEvent(ev) {
   if (ev.type === "rooms") { Net.rooms = ev.rooms || []; renderRoomList(); }
   else if (ev.type === "peer") {
@@ -2343,7 +2391,7 @@ function netEvent(ev) {
       setTimeout(() => { Net.stop(); goHome(); }, 1200);
     }
   } else if (ev.type === "msg") { try { onNetMsg(JSON.parse(ev.data)); } catch (e) {} }
-  else if (ev.type === "error") { const el = document.getElementById("tgMsg"); if (el) el.textContent = ev.text; }
+  else if (ev.type === "error") { const el = document.getElementById("tgMsg"); if (el) { el.style.color = "var(--warn)"; el.textContent = ev.text; } }
 }
 
 // --- Screens ---
@@ -2356,36 +2404,73 @@ function openTogether() {
   }
   if (!Net.available) {
     sheet(`<h2 data-dismissable>Play Together</h2>
-      <p>Play on two iPads at once, each with your own screen. This works in the Toy Box Arena app on iPad and iPhone.</p>
+      <p>Play Together needs the Toy Box Arena app or the website (kbaillie1231.github.io/toyboxarena) in Safari or Chrome.</p>
       <button class="btn primary" id="tgOk">OK</button>`, (h, close) => { h.querySelector("#tgOk").onclick = close; });
     return;
   }
+  const nearby = Net.native || Net.loop;
   sheet(`<h2 data-dismissable>Play Together</h2>
-    <p>Two iPads, one game. One person hosts and the other joins. Both iPads need to be nearby with Wi-Fi or Bluetooth on.</p>
+    <p>Each player uses their own screen. One person hosts and the other joins.</p>
     <p style="font-weight:700;color:var(--ink)">Your name</p>
-    <input id="tgName" maxlength="20" value="${nameOrDefault().replace(/"/g, "&quot;")}" aria-label="Your name"
+    <input id="tgName" maxlength="20" value="${esc(nameOrDefault())}" aria-label="Your name"
       style="font:400 22px var(--display);border:2px solid #dde6ee;border-radius:12px;padding:8px 12px;color:var(--ink);-webkit-user-select:text;user-select:text">
-    <button class="btn primary" id="tgHost" style="font-size:18px;padding:12px">Host a game</button>
-    <button class="btn" id="tgJoin" style="font-size:18px;padding:12px">Join a game</button>
-    <p class="hint">No chat and no strangers: you only connect to a game you pick.</p>`, (h, close) => {
+    <p style="font-weight:700;color:var(--ink)">Friend far away <span style="font-weight:500;color:var(--muted)">(online)</span></p>
+    <div class="bar" style="justify-content:flex-start">
+      <button class="btn primary" id="tgHostOn">Host with a code</button>
+      <button class="btn" id="tgJoinOn">Join with a code</button>
+    </div>
+    ${nearby ? `<p style="font-weight:700;color:var(--ink)">Friend in the same room <span style="font-weight:500;color:var(--muted)">(no internet needed)</span></p>
+    <div class="bar" style="justify-content:flex-start">
+      <button class="btn" id="tgHost">Host nearby</button>
+      <button class="btn" id="tgJoin">Join nearby</button>
+    </div>` : ""}
+    <p class="hint">No chat and no strangers: only share your code with friends you know.</p>`, (h, close) => {
     const takeName = () => { const v = h.querySelector("#tgName").value.trim(); if (v) setMyName(v); renderHomeName(); };
-    h.querySelector("#tgHost").onclick = () => { takeName(); togetherHost(); };
-    h.querySelector("#tgJoin").onclick = () => { takeName(); togetherJoin(); };
+    h.querySelector("#tgHostOn").onclick = () => { takeName(); togetherHost("online"); };
+    h.querySelector("#tgJoinOn").onclick = () => { takeName(); togetherJoinCode(); };
+    if (nearby) {
+      h.querySelector("#tgHost").onclick = () => { takeName(); togetherHost("nearby"); };
+      h.querySelector("#tgJoin").onclick = () => { takeName(); togetherJoin(); };
+    }
   });
 }
-function roomCode() { const L = "BCDFGHJKLMNPQRSTVWXZ"; let s = ""; for (let i = 0; i < 4; i++) s += L[rint(0, L.length - 1)]; return s; }
-function togetherHost() {
-  Net.stop(); Net.role = "host"; Net.code = roomCode(); Net.myName = nameOrDefault();
-  Net.post("host", { name: nameOrDefault(), code: Net.code, game: "pitch" });
-  sheet(`<h2>Room ${Net.code}</h2>
-    <p>Waiting for a friend… On the other iPad, tap <b>Play Together → Join a game</b> and pick <b>${nameOrDefault().replace(/</g, "&lt;")}</b>.</p>
-    <p id="tgMsg" class="hint"></p>
+const CODE_LETTERS = "BCDFGHJKLMNPQRSTVWXZ";
+function roomCode(n = 4) { let s = ""; for (let i = 0; i < n; i++) s += CODE_LETTERS[rint(0, CODE_LETTERS.length - 1)]; return s; }
+function togetherHost(transport) {
+  Net.stop(); Net.transport = transport; Net.role = "host"; Net.code = roomCode(transport === "online" ? 6 : 4); Net.myName = nameOrDefault();
+  Net.post("host", { name: Net.myName, code: Net.code, game: "" });
+  sheet(`<h2>${transport === "online" ? "Your code" : "Room " + Net.code}</h2>
+    ${transport === "online" ? `<div style="font:400 44px var(--display);letter-spacing:.12em;text-align:center;color:var(--ink);background:#f3f7fb;border-radius:14px;padding:10px 0;-webkit-user-select:text;user-select:text">${Net.code}</div>
+    <p>Tell your friend this code. They open Toy Box Arena (the app or the website), tap <b>Play Together → Join with a code</b> and type it in.</p>`
+    : `<p>On the other iPad, tap <b>Play Together → Join nearby</b> and pick <b>${esc(Net.myName)}</b>.</p>`}
+    <p class="hint">Waiting for your friend…</p>
+    <p id="tgMsg" class="hint" style="color:var(--warn)"></p>
     <button class="btn" id="tgCancel">Cancel</button>`, (h, close) => { h.querySelector("#tgCancel").onclick = () => { Net.stop(); close(); }; });
 }
+function togetherJoinCode() {
+  sheet(`<h2>Join with a code</h2>
+    <p>Type the 6-letter code your friend sees on their screen.</p>
+    <input id="tgCode" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="Game code" placeholder="BKRTZQ"
+      style="font:400 40px var(--display);letter-spacing:.12em;text-align:center;text-transform:uppercase;border:2px solid #dde6ee;border-radius:14px;padding:8px 0;color:var(--ink);-webkit-user-select:text;user-select:text">
+    <button class="btn primary" id="tgGo" style="font-size:18px;padding:12px">Join</button>
+    <p id="tgMsg" class="hint" style="color:var(--warn)"></p>
+    <button class="btn" id="tgCancel">Cancel</button>`, (h, close) => {
+    const box = h.querySelector("#tgCode"), msg = h.querySelector("#tgMsg");
+    box.addEventListener("input", () => { box.value = box.value.toUpperCase().replace(/[^A-Z]/g, ""); });
+    h.querySelector("#tgGo").onclick = () => {
+      const code = box.value.trim().toUpperCase();
+      if (code.length !== 6) { msg.textContent = "Codes have 6 letters."; return; }
+      Net.stop(); Net.transport = "online"; Net.role = "guest"; Net.myName = nameOrDefault();
+      Net.post("join", { id: code });
+      msg.style.color = "var(--muted)"; msg.textContent = "Connecting…";
+    };
+    h.querySelector("#tgCancel").onclick = () => { Net.stop(); close(); };
+  });
+}
 function togetherJoin() {
-  Net.stop(); Net.role = "browse"; Net.rooms = []; Net.myName = nameOrDefault();
-  Net.post("browse", { name: nameOrDefault() });
-  sheet(`<h2>Join a game</h2>
+  Net.stop(); Net.transport = "nearby"; Net.role = "browse"; Net.rooms = []; Net.myName = nameOrDefault();
+  Net.post("browse", { name: Net.myName });
+  sheet(`<h2>Join nearby</h2>
     <p>Looking for games nearby…</p>
     <div id="tgRooms" class="rules"></div>
     <p id="tgMsg" class="hint"></p>
@@ -2616,7 +2701,7 @@ const GAME_CARDS = [
   { id: "splat", title: "Splat Tag", desc: "Run around and splat the robots before they splat you.", tag: "Shooter · New", tint: "#ff4fa0" },
   { id: "race", title: "Obstacle Race", desc: "Sprint, jump the gaps and dodge spinners to the flag.", tag: "Race · New", tint: "#ffd23f" },
   { id: "pitch", title: "Pitch Ball", desc: "Kick the big ball into the other net. Two players on one screen.", tag: "Sports · New", tint: "#3fbf55" },
-  { id: "together", title: "Play Together", desc: "Two iPads or iPhones, one game. Every game works, and each player gets their own screen.", tag: "2 devices · New", tint: "#2fa8ff" },
+  { id: "together", title: "Play Together", desc: "Play any game with a friend on their own screen: in the same room, or far away online with a code.", tag: "Online · New", tint: "#2fa8ff" },
   { id: "random", title: "Random Game", desc: "A surprise game, a surprise arena and surprise rules. Every time.", tag: "Surprise", tint: "#8a5cff" },
   { id: "maker", title: "Game Maker", desc: "Pick a game, mix in rule twists, name it and share it.", tag: "Make · New", tint: "#1d2b3a" },
   { id: "workshop", title: "Workshop", desc: "Build your own arena from toy pieces, then play any game in it.", tag: "Build", tint: "#ff8a3d" },
@@ -2910,7 +2995,7 @@ addEventListener("resize", resize);
 
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; // never negative, never a huge jump
   time += dt;
   if (kerbsDirty) rebuildKerbs();
   for (const p of grid.values()) if (p.obj.userData.arm) p.obj.userData.arm.rotation.y = time * SPIN_W;
