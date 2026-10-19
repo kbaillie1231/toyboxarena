@@ -233,9 +233,9 @@ table.card td:last-child { text-align: right; font-weight: 700; }
 const W = 10, H = 10, TILE = 2, TOP = 0.22;
 // These change with a random game's rule twists (see RULES below); resetRules() puts them back.
 let BALL_R = 0.15, G = 9.8;
-const TYPES = ["floor", "wall", "ramp", "booster", "bouncer", "goal", "start", "spinner", "target", "net"];
-const LABEL = { floor: "Floor", wall: "Wall", ramp: "Ramp", booster: "Boost", bouncer: "Bumper", goal: "Hole", start: "Tee", spinner: "Spinner", target: "Target", net: "Goal net" };
-const SWATCH = { floor: "#5ccf4f", wall: "#ff8a3d", ramp: "#7ee06f", booster: "#2fa8ff", bouncer: "#ff4fa0", goal: "#1b1b1b", start: "#ffd23f", spinner: "#8a5cff", target: "#ff3b3b", net: "#ffffff" };
+const TYPES = ["floor", "wall", "ramp", "booster", "bouncer", "goal", "start", "spinner", "target", "net", "pins"];
+const LABEL = { floor: "Floor", wall: "Wall", ramp: "Ramp", booster: "Boost", bouncer: "Bumper", goal: "Hole", start: "Tee", spinner: "Spinner", target: "Target", net: "Goal net", pins: "Pin deck" };
+const SWATCH = { floor: "#5ccf4f", wall: "#ff8a3d", ramp: "#7ee06f", booster: "#2fa8ff", bouncer: "#ff4fa0", goal: "#1b1b1b", start: "#ffd23f", spinner: "#8a5cff", target: "#ff3b3b", net: "#ffffff", pins: "#e8c07a" };
 const PLAYER_COLORS = ["#ffffff", "#ffd23f", "#ff4fa0", "#2fa8ff"];
 const PLAYER_NAMES = ["White", "Yellow", "Pink", "Blue"];
 let MAX_STROKES = 10; const SPIN_W = 1.6, MAX_SHOT = 12, PIECE_BUDGET = 120;
@@ -247,31 +247,34 @@ let MAX_STROKES = 10; const SPIN_W = 1.6, MAX_SHOT = 12, PIECE_BUDGET = 120;
 let FRICTION = 1, BOUNCE = 1, WIND = [0, 0], SHOT_MULT = 1, TARGET_SPEED = 1, TARGET_SIZE = 1, ROBOT_SPEED = 1, ROBOT_COUNT = 1, LIVES = 3;
 let activeTwists = [];
 const TWISTS = [
-  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "blast", "rush", "splat", "race", "pitch"], apply: () => { G = 9.8 * 0.38; } },
-  { id: "ice", word: "Ice", name: "Ice rink", desc: "The ball barely slows down.", color: "#2fa8ff", games: ["golf"], apply: () => { FRICTION = 0.3; } },
-  { id: "bouncy", word: "Bouncy", name: "Super bouncy", desc: "Walls and bumpers bounce way harder.", color: "#ff4fa0", games: ["golf", "blast", "rush", "splat", "race", "pitch"], apply: () => { BOUNCE = 1.35; } },
-  { id: "giant", word: "Giant", name: "Giant ball", desc: "Your ball is twice as big.", color: "#ff8a3d", games: ["golf"], apply: () => { BALL_R = 0.3; } },
+  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { G = 9.8 * 0.38; } },
+  { id: "ice", word: "Ice", name: "Ice rink", desc: "The ball barely slows down.", color: "#2fa8ff", games: ["golf", "bowl"], apply: () => { FRICTION = 0.3; } },
+  { id: "bouncy", word: "Bouncy", name: "Super bouncy", desc: "Walls and bumpers bounce way harder.", color: "#ff4fa0", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { BOUNCE = 1.35; } },
+  { id: "giant", word: "Giant", name: "Giant ball", desc: "Your ball is twice as big.", color: "#ff8a3d", games: ["golf", "bowl"], apply: () => { BALL_R = 0.3; } },
   { id: "tiny", word: "Tiny", name: "Tiny ball", desc: "A pea-sized ball. The cup feels huge.", color: "#3fbf55", games: ["golf"], apply: () => { BALL_R = 0.08; } },
   { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "blast", "rush", "splat"],
     apply: () => { const a = Math.random() * Math.PI * 2; WIND = [Math.cos(a) * 1.6, Math.sin(a) * 1.6]; } },
   { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf"], apply: () => { SHOT_MULT = 1.6; } },
-  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch"],
-    apply: () => { MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; } },
+  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "Just 1 minute to fish." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish"],
+    apply: () => { MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 60; } },
   { id: "speedy", word: "Speedy", name: "Speedy targets", desc: "Targets pop up and drop twice as fast.", color: "#ffd23f", games: ["blast"], apply: () => { TARGET_SPEED = 1.9; } },
   { id: "big", word: "Big-Target", name: "Big targets", desc: "Targets are easier to hit.", color: "#5ccf4f", games: ["blast"], apply: () => { TARGET_SIZE = 1.5; } },
   { id: "rapid", word: "Rapid-Fire", name: "Rapid fire", desc: "The blaster fires three times as fast.", color: "#ff8a3d", games: ["blast", "rush", "splat"], apply: () => { FIRE_COOLDOWN = 0.07; } },
   { id: "turbo", word: "Turbo", name: "Turbo robots", desc: "Robots move 60% faster.", color: "#ff3b3b", games: ["rush"], apply: () => { ROBOT_SPEED = 1.6; } },
   { id: "swarm", word: "Swarm", name: "Robot swarm", desc: "Way more robots per wave.", color: "#8a5cff", games: ["rush"], apply: () => { ROBOT_COUNT = 1.7; } },
-  { id: "legs", word: "Turbo-Legs", name: "Turbo legs", desc: "Everyone runs 50% faster.", color: "#ff3b3b", games: ["splat", "race", "pitch"], apply: () => { AVATAR_SPEED = 1.5; } },
-  { id: "slip", word: "Slippery", name: "Slippery floor", desc: "It's hard to stop and turn.", color: "#2fa8ff", games: ["splat", "race", "pitch"], apply: () => { FRICTION_AV = 0.25; } },
+  { id: "legs", word: "Turbo-Legs", name: "Turbo legs", desc: "Everyone runs 50% faster.", color: "#ff3b3b", games: ["splat", "race", "pitch", "koth"], apply: () => { AVATAR_SPEED = 1.5; } },
+  { id: "slip", word: "Slippery", name: "Slippery floor", desc: "It's hard to stop and turn.", color: "#2fa8ff", games: ["splat", "race", "pitch", "koth"], apply: () => { FRICTION_AV = 0.25; } },
   { id: "army", word: "Bot-Army", name: "Bot army", desc: "Six robots instead of three.", color: "#46566a", games: ["splat"], apply: () => { BOT_COUNT = 6; } },
   { id: "mega", word: "Mega-Ball", name: "Mega ball", desc: "A giant ball, easier to hit, harder to stop.", color: "#ffd23f", games: ["pitch"], apply: () => { PITCH_BALL_R = 0.8; } },
+  { id: "hungry", word: "Hungry-Fish", name: "Hungry fish", desc: "Fish bite every 4–12 seconds.", color: "#3fbf55", games: ["fish"], apply: () => { FISH_BITE = [4, 12]; } },
+  { id: "monster", word: "Monster", name: "Monster fish", desc: "Tuna and sharks show up way more.", color: "#1d3557", games: ["fish"], apply: () => { FISH_BIG = 3; } },
   { id: "hop", word: "Super-Jump", name: "Super jump", desc: "Jumps go way higher and further.", color: "#3fbf55", games: ["race"], apply: () => { JUMP_MULT = 1.5; } },
 ];
 function resetRules() {
   BALL_R = 0.15; G = 9.8; FRICTION = 1; BOUNCE = 1; WIND = [0, 0]; SHOT_MULT = 1; MAX_STROKES = 10;
   BLAST_TIME = 30; FIRE_COOLDOWN = 0.22; TARGET_SPEED = 1; TARGET_SIZE = 1; ROBOT_SPEED = 1; ROBOT_COUNT = 1; LIVES = 3;
   AVATAR_SPEED = 1; FRICTION_AV = 1; BOT_COUNT = 3; SPLAT_TIME = 60; RACE_LIMIT = 90; GOALS_TO_WIN = 3; PITCH_BALL_R = 0.45; JUMP_MULT = 1;
+  BOWL_FRAMES = 5; KOTH_TIME = 45; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
   activeTwists = [];
 }
 function applyTwists(list) { resetRules(); activeTwists = list; for (const t of list) t.apply(); }
@@ -374,11 +377,20 @@ function loadTemplates() {
         templates[t] = gltf.scene; res();
       }, fallback);
     } catch (e) { fallback(); }
-  }))).then(() => { templates.net = makeNetTemplate(); });
+  }))).then(() => { templates.net = makeNetTemplate(); templates.pins = makePinsTemplate(); });
 }
 
 // Pitch Ball goal: built in code (no Blender mesh). A floor tile with a white frame and a see-through net.
 // The open mouth faces backward (local −Y); the net's back sits on the piece's forward edge.
+// Bowling pin deck: a polished wood tile with ten pin spots (the pins themselves are game objects).
+function makePinsTemplate() {
+  const g = templates.floor.clone(true);
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.03, 1.84), new THREE.MeshStandardMaterial({ color: "#e8c07a", roughness: 0.3 }));
+  deck.position.y = TOP + 0.005; deck.receiveShadow = true; g.add(deck);
+  const dotMat = new THREE.MeshBasicMaterial({ color: "#b08a4a" });
+  for (let r = 0; r < 4; r++) for (let i = 0; i <= r; i++) { const d = new THREE.Mesh(new THREE.CircleGeometry(0.06, 12), dotMat); d.rotation.x = -Math.PI / 2; d.position.set((i - r / 2) * 0.3, TOP + 0.025, -(r * 0.27 - 0.4)); g.add(d); }
+  return g;
+}
 function makeNetTemplate() {
   const g = templates.floor.clone(true), h = 0.95, top = TOP + h;
   const post = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.35 });
@@ -469,6 +481,7 @@ scene.add(kerbGroup);
 let kerbsDirty = true;
 function rebuildKerbs() {
   kerbsDirty = false; kerbs.clear(); kerbGroup.clear();
+  if (game === "koth" && mode !== "build") return; // King of the Hill: no rails, so you can be shoved off
   for (const p of grid.values()) {
     if (p.type === "ramp") continue;
     const list = [], [cx, cy] = cellCenter(p.x, p.y), h = p.lvl + TOP;
@@ -581,7 +594,7 @@ function step(b, dt) {
   }
   let speed = Math.hypot(b.vx, b.vy);
   if (b.grounded && speed > 0) { // rolling resistance
-    const ns = Math.max(0, speed - (0.9 + 0.32 * speed) * FRICTION * dt);
+    const ns = Math.max(0, speed - (0.9 + 0.32 * speed) * FRICTION * (b.fr || 1) * dt);
     b.vx *= ns / speed; b.vy *= ns / speed; speed = ns;
   }
   // Wind only pushes a moving or flying ball, so a ball at rest stays put and turns still end.
@@ -781,11 +794,17 @@ const GAMES = {
   splat: { name: "Splat Tag", needs: "start", needLabel: "at least 6 tiles to run around on" },
   race: { name: "Obstacle Race", needs: "goal", needLabel: "a hole as the finish line" },
   pitch: { name: "Pitch Ball", needs: "net", needLabel: "two goal nets" },
+  bowl: { name: "Bumper Bowling", needs: "pins", needLabel: "a pin deck" },
+  koth: { name: "King of the Hill", needs: "hill", needLabel: "a hill (some tiles at height 1 or 2)" },
+  fish: { name: "Beach Fishing", needs: "", needLabel: "" },
 };
 function validity(g = game) {
   let starts = 0, goals = 0, targets = 0, nets = 0;
   for (const p of grid.values()) { if (p.type === "start") starts++; if (p.type === "goal") goals++; if (p.type === "target") targets++; if (p.type === "net") nets++; }
   if (g === "pitch") return { starts, goals, targets, nets, need: nets >= 2 ? 1 : 0, ok: nets >= 2, noTee: true };
+  if (g === "fish") return { starts, goals, targets, nets, need: 1, ok: true, noTee: true };
+  if (g === "koth") { const hill = grid.size >= 6 && [...grid.values()].some(p => p.lvl >= 1); return { starts, goals, targets, nets, need: hill ? 1 : 0, ok: hill, noTee: true }; }
+  if (g === "bowl") { const deck = [...grid.values()].some(p => p.type === "pins"); return { starts, goals, targets, nets, need: deck ? 1 : 0, ok: starts === 1 && deck }; }
   const need = g === "blast" ? targets : g === "rush" ? (goals && starts === 1 && robotPath() ? 1 : 0)
     : g === "splat" ? (grid.size >= 6 ? 1 : 0) : goals;
   return { starts, goals, targets, nets, need, ok: starts === 1 && need >= 1 };
@@ -798,6 +817,9 @@ function startPlay() {
   if (game === "splat") return startSplat();
   if (game === "race") return startRace();
   if (game === "pitch") return startPitch();
+  if (game === "bowl") return startBowl();
+  if (game === "koth") return startKoth();
+  if (game === "fish") return startFish();
   const v = validity();
   if (!v.ok) { toast(validityMessage(v)); return; }
   const st = findStart(), [sx, sy] = cellCenter(st.x, st.y);
@@ -1273,7 +1295,7 @@ function randomRushThenPlay() {
 // ===========================================================================
 const AV_R = 0.28, AV_SPEED = 5.2, JUMP_V = 5.2;
 let AVATAR_SPEED = 1, FRICTION_AV = 1, BOT_COUNT = 3, SPLAT_TIME = 60, RACE_LIMIT = 90, GOALS_TO_WIN = 3, PITCH_BALL_R = 0.45, JUMP_MULT = 1;
-const AVATAR_GAMES = ["splat", "race", "pitch"];
+const AVATAR_GAMES = ["splat", "race", "pitch", "koth"];
 const isAvatarGame = (g = game) => AVATAR_GAMES.includes(g);
 
 const capsuleGeo = new THREE.CapsuleGeometry(0.24, 0.3, 6, 14), visorGeo = new THREE.BoxGeometry(0.36, 0.15, 0.12);
@@ -1780,6 +1802,7 @@ function randomPitchLayout() {
 
 function stopAvatarGames() {
   clearSticks();
+  if (koth) { removeAvatar(koth.you); koth.bots.forEach(removeAvatar); koth = null; kerbsDirty = true; }
   if (splat) { removeAvatar(splat.you); splat.bots.forEach(removeAvatar); splat.shots.forEach(s => scene.remove(s.mesh)); splat = null; }
   if (race) { removeAvatar(race.you); race = null; }
   if (pitch) { pitch.members.flat().forEach(removeAvatar); scene.remove(pitch.ball.mesh); pitch = null; }
@@ -1788,7 +1811,7 @@ function stopAvatarGames() {
 // Pointer handling for the character games (called from the canvas listeners first).
 function avatarPointer(type, ev) {
   if (ev.remote) { // from the other iPad (its joystick is sent separately)
-    if (type === "down") { if (game === "splat") splatShootAt(ev); else if (game === "race") raceJump(); }
+    if (type === "down") { if (game === "splat") splatShootAt(ev); else if (game === "race") raceJump(); else if (game === "koth") kothYouDash(); }
     return;
   }
   if (type === "down") {
@@ -1797,6 +1820,8 @@ function avatarPointer(type, ev) {
       if (![...sticks.values()].some(s => s.owner === owner)) stickStart(ev, owner);
     } else if (game === "race") {
       if (ev.clientX < innerWidth * 0.55 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else raceJump();
+    } else if (game === "koth") {
+      if (ev.clientX < innerWidth * 0.45 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else kothYouDash();
     } else if (game === "splat") {
       if (ev.clientX < innerWidth * 0.45 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else splatShootAt(ev);
     }
@@ -1939,9 +1964,10 @@ canvas.addEventListener("pointerdown", ev => {
   if (Net.mirror) { guestPointer("down", ev); return; }
   if (Net.online && !(ev.remote ? remoteMay() : localMay())) { if (ev.remote) ev.stopImmediatePropagation(); return; }
   if (ev.remote) ev.stopImmediatePropagation(); // keep remote taps away from the host's camera controls
+  if (mode === "play" && game === "fish") { fishPointer("down", ev); return; }
   if (mode === "play" && isAvatarGame()) { avatarPointer("down", ev); return; }
   down = { x: ev.clientX, y: ev.clientY, t: performance.now(), id: ev.pointerId };
-  if (mode === "play" && game === "golf" && !shotLive && players[turn] && !players[turn].done) {
+  if (mode === "play" && (game === "golf" || (game === "bowl" && bowl && bowl.phase === "aim")) && !shotLive && players[turn] && !players[turn].done) {
     const b = players[turn].ball, g = groundHit(ev, b.z);
     if (g && Math.hypot(g[0] - b.x, g[1] - b.y) < 1.8) {
       aiming = { start: g, cur: g };
@@ -1954,6 +1980,7 @@ canvas.addEventListener("pointermove", ev => {
   if (Net.mirror) { guestPointer("move", ev); return; }
   if (Net.online && !(ev.remote ? remoteMay() : localMay())) { if (ev.remote) ev.stopImmediatePropagation(); return; }
   if (ev.remote) ev.stopImmediatePropagation(); // keep remote taps away from the host's camera controls
+  if (mode === "play" && game === "fish") { fishPointer("move", ev); return; }
   if (mode === "play" && isAvatarGame()) { avatarPointer("move", ev); return; }
   if (aiming) { const b = players[turn].ball, g = groundHit(ev, b.z); if (g) aiming.cur = g; return; }
   if (mode === "build" && ev.pointerType === "mouse") {
@@ -1966,12 +1993,13 @@ canvas.addEventListener("pointerup", ev => {
   if (Net.mirror) { guestPointer("up", ev); return; }
   if (Net.online && !(ev.remote ? remoteMay() : localMay())) { if (ev.remote) ev.stopImmediatePropagation(); return; }
   if (ev.remote) ev.stopImmediatePropagation(); // keep remote taps away from the host's camera controls
+  if (mode === "play" && game === "fish") { fishPointer("up", ev); return; }
   if (mode === "play" && isAvatarGame()) { avatarPointer("up", ev); return; }
   if (aiming) {
     const [dx, dy] = [aiming.start[0] - aiming.cur[0], aiming.start[1] - aiming.cur[1]];
     const len = Math.hypot(dx, dy), power = Math.min(MAX_SHOT * SHOT_MULT, len * 3.2 * SHOT_MULT);
     aiming = null; controls.enabled = true; aimGroup.visible = false;
-    if (power > 0.4) shoot(dx / len, dy / len, power);
+    if (power > 0.4) { if (game === "bowl") bowlRoll(dx / len, dy / len, power); else shoot(dx / len, dy / len, power); }
     return;
   }
   if (!down) return;
@@ -2026,11 +2054,13 @@ function toast(msg) {
 function setMode(m) {
   mode = m;
   board.visible = m === "build"; cursor.visible = false;
-  controls.enabled = !(m === "play" && isAvatarGame()); // character games steer the camera themselves
+  controls.enabled = !(m === "play" && (isAvatarGame() || game === "bowl" || game === "fish")); // these games steer the camera themselves
+  showBeach(game === "fish" && m !== "build");
+  kerbsDirty = true;
   const off = camera.position.clone().sub(controls.target);
   const shooter = game === "blast" || game === "rush";
   blaster.visible = m === "play" && shooter;
-  if (m === "build" || m === "preview") stopAvatarGames();
+  if (m === "build" || m === "preview") { stopAvatarGames(); stopBowl(); stopFish(); }
   if (m === "build") { if (blast) for (const s of blast.shots) scene.remove(s.mesh); blast = null; clearRobots(); rush = null; }
   if (m === "play" && shooter) { // stand behind the blaster, looking out over the range
     // Look at the middle of the targets from behind and above the tee, far enough to see them all.
@@ -2045,6 +2075,8 @@ function setMode(m) {
     barrelPivot.rotation.y = Math.atan2(-(mx - sx), my - sy); // barrel faces the range
   } else if (m === "play") { // move in closer for putting
     if (off.length() > 16) camera.position.copy(controls.target).add(off.setLength(16));
+  } else if (m === "preview" && game === "fish") { // look out from the beach
+    controls.target.set(0, 0.5, -20); camera.position.set(3, 6, 4);
   } else if (m === "preview" && grid.size) { // frame this arena behind the lobby card
     const ps = [...grid.values()].map(p => cellCenter(p.x, p.y));
     const mx = ps.reduce((a, p) => a + p[0], 0) / ps.length, my = ps.reduce((a, p) => a + p[1], 0) / ps.length;
@@ -2066,6 +2098,35 @@ function renderHud() {
   const chips = (val) => `<div class="scores">${players.map((p, k) =>
     `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${val(p)}</div>`).join("")}</div>`;
   const hint = (t) => `<div class="hint" style="color:#fff;text-shadow:0 1px 2px #0005">${t}</div>`;
+  if (mode === "play" && game === "bowl") {
+    top.innerHTML = chips(p => p.score);
+    const cur = players[turn];
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && bowl ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}frame ${Math.min(bowl.frame, BOWL_FRAMES)}/${BOWL_FRAMES} · roll ${bowl.roll} · ${cur.frames.join(" ") || "–"}` : ""}</div>${hint("Drag back from the ball and let go to bowl")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "koth") {
+    top.innerHTML = chips(p => p.score.toFixed(0) + "s");
+    const cur = players[turn], secs = koth ? Math.max(0, Math.ceil(koth.timeLeft)) : 0;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}0:${String(secs).padStart(2, "0")} · 👑 ${cur.score.toFixed(1)}s on top` : ""}</div>${hint("Left thumb: run · tap right side: dash and shove")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "fish") {
+    top.innerHTML = chips(p => `${p.score} 🐟`);
+    const cur = players[turn], f = fish, secs = f ? Math.max(0, Math.ceil(f.timeLeft)) : 0;
+    const clock = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
+    let line = "Drag back and let go to cast", extra = "";
+    if (f && f.state === "flying") line = "Casting…";
+    if (f && f.state === "wait") line = "Waiting for a bite…";
+    if (f && f.state === "bite") line = "<b style='color:var(--warn)'>A fish is biting! Tap now!</b>";
+    if (f && f.state === "show") line = "Got one!";
+    if (f && f.state === "reel") {
+      const pct = Math.round(Math.min(1, f.tension) * 100), col = pct > 80 ? "var(--warn)" : pct > 55 ? "#ffb02e" : "var(--go)";
+      line = `Hold to reel · let go when it's red · ${Math.max(0, f.dist).toFixed(0)} m`;
+      extra = `<div class="panel" style="width:min(320px,80vw);padding:6px"><div style="height:16px;border-radius:8px;background:#e6edf3;overflow:hidden"><div style="height:100%;width:${pct}%;background:${col};border-radius:8px"></div></div></div>`;
+    }
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column">${extra}<div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}${clock} · ${cur.score} fish` : ""}</div>${hint(line)}</div>`;
+    return;
+  }
   if (mode === "play" && game === "splat") {
     top.innerHTML = chips(p => p.score);
     const cur = players[turn], secs = splat ? Math.max(0, Math.ceil(splat.timeLeft)) : 0;
@@ -2155,6 +2216,9 @@ const GAME_HOWTO = {
   splat: "Left thumb runs, tap to throw splats. Splat the robots before they splat you.",
   race: "Left thumb runs, tap the right side to jump. Fastest to the flag wins.",
   pitch: "Run into the ball to kick it into the other net. Two players each get half the screen.",
+  bowl: "Drag back from the ball and let go to bowl. Knock down all 10 pins! 5 frames each.",
+  koth: "Stay on the very top to score. Tap the right side to dash and shove the robots off.",
+  fish: "Drag back to cast. When a fish bites, tap fast, then hold to reel. Most fish wins.",
 };
 function askPlayers() {
   // Default to whichever game this arena can already be played as.
@@ -2229,7 +2293,22 @@ function arenaSheet() {
 function showResults() {
   const chip = (p) => `<span class="chip" style="box-shadow:none;padding:0;display:inline-flex"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a33"></b>${PLAYER_NAMES[p.i]}</span>`;
   let head, table, again = "Same arena again";
-  if (game === "splat") {
+  if (game === "bowl") {
+    const rows = [...players].sort((a, b) => b.score - a.score);
+    head = rows.length > 1 ? esc(PLAYER_NAMES[rows[0].i]) + " wins!" : `${rows[0].score} points!`;
+    table = rows.map(p => `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">${p.frames.join(" ")} · ${p.strikes} strike${p.strikes === 1 ? "" : "s"}</span></td><td>${p.score}</td></tr>`).join("");
+    again = "Same lane again";
+  } else if (game === "koth") {
+    const rows = [...players].sort((a, b) => b.score - a.score);
+    head = rows.length > 1 ? esc(PLAYER_NAMES[rows[0].i]) + " is king!" : `${rows[0].score.toFixed(1)} seconds on top!`;
+    table = rows.map(p => `<tr><td>${chip(p)}</td><td>${p.score.toFixed(1)}s</td></tr>`).join("");
+    again = "Same hill again";
+  } else if (game === "fish") {
+    const rows = [...players].sort((a, b) => b.score - a.score || b.kg - a.kg);
+    head = rows.length > 1 ? esc(PLAYER_NAMES[rows[0].i]) + " wins!" : `${rows[0].score} fish!`;
+    table = rows.map(p => `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">${p.kg} kg${p.best ? ` · biggest: ${p.best.name} ${p.best.kg} kg` : ""}</span></td><td>${p.score} 🐟</td></tr>`).join("");
+    again = "Fish again";
+  } else if (game === "splat") {
     const rows = [...players].sort((a, b) => b.score - a.score);
     head = rows.length > 1 ? PLAYER_NAMES[rows[0].i] + " wins!" : `${rows[0].score} splats!`;
     table = rows.map(p => `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">got splatted ${p.splatted}×</span></td><td>${p.score}</td></tr>`).join("");
@@ -2577,7 +2656,8 @@ function hostSnapshot() {
   const boards = targetPieces().map(p => { const b = p.obj.userData.board; return b ? [r2(b.rotation.x), r2(b.scale.x)] : [0, 1]; });
   const bl = blaster.visible ? [r2(blaster.position.x), r2(blaster.position.y), r2(blaster.position.z), r2(barrelPivot.rotation.y), "#" + blasterMat.color.getHexString(), r2(barrel.position.z)] : null;
   const aim = aimGroup.visible ? [r2(aimGroup.position.x), r2(aimGroup.position.y), r2(aimGroup.position.z), r2(aimGroup.rotation.y), r2(shaft.scale.z), "#" + aimMat.color.getHexString()] : null;
-  Net.send({ t: "snap", e, b: boards, bl, aim, tm: r2(time), g: game, m: mode, bv: board.visible ? 1 : 0,
+  const lp = lineGeo.attributes.position, ln = fishLine.visible ? [lp.getX(0), lp.getY(0), lp.getZ(0), lp.getX(1), lp.getY(1), lp.getZ(1)].map(r2) : null;
+  Net.send({ t: "snap", e, b: boards, bl, aim, ln, tm: r2(time), g: game, m: mode, bv: board.visible ? 1 : 0,
     cam: [camera.position.x, camera.position.y, camera.position.z, controls.target.x, controls.target.y, controls.target.z].map(r2) }, false);
 }
 function onRemoteClick(m) {
@@ -2607,6 +2687,10 @@ function mirrorMake(kind, color, r) {
   if (kind === "robot") return makeRobot(color);
   if (kind === "figure") return makeFigure(color);
   if (kind === "pball") return makeBallMesh(r || 0.45);
+  if (kind === "pin") return makePin();
+  if (kind === "bobber") return makeBobber();
+  if (kind === "fish") return makeFishMesh(color);
+  if (kind === "rod") return makeRod();
   return new THREE.Group();
 }
 function onSnap(s) {
@@ -2625,6 +2709,8 @@ function onSnap(s) {
   aimGroup.visible = !!s.aim;
   if (s.aim) { const [x, y, z, ry, L, c] = s.aim; aimGroup.position.set(x, y, z); aimGroup.rotation.y = ry; shaft.scale.z = L; shaft.position.z = -L / 2 - BALL_R; head.position.z = -L - BALL_R - 0.2; aimMat.color.set(c); }
   time = s.tm; board.visible = !!s.bv;
+  showBeach(s.g === "fish" && s.m !== "build");
+  if (s.ln) setLine(tmpA.set(s.ln[0], s.ln[1], s.ln[2]), tmpB.set(s.ln[3], s.ln[4], s.ln[5])); else fishLine.visible = false;
 }
 function mirrorFrame(dt) {
   const k = Math.min(1, dt * 15);
@@ -2647,7 +2733,7 @@ function guestPointer(type, ev) {
   ray.setFromCamera(ndc, camera);
   if (isAvatarGame(mirror.game) && mirror.mode === "play") { // thumb zone: joystick drawn here, direction streamed
     if (type === "down") {
-      const zone = mirror.game === "pitch" ? 1 : mirror.game === "race" ? 0.55 : 0.45;
+      const zone = mirror.game === "pitch" ? 1 : mirror.game === "race" ? 0.55 : 0.45; // koth and splat: left part steers
       if (ev.clientX < innerWidth * zone && sticks.size === 0) { stickStart(ev, 0); return; }
     } else if (type === "move") { if (stickMove(ev)) return; }
     else if (stickEnd(ev)) { Net.send({ t: "stick", d: [0, 0] }, false); return; }
@@ -2689,6 +2775,584 @@ function onNetMsg(m) {
     else if (m.t === "burst") burst(...m.a);
   }
 }
+
+// ===========================================================================
+// BUMPER BOWLING: roll down a lane into 10 pins. The auto-rails are the bumpers. 5 frames each,
+// two rolls per frame; strike = +10 bonus, spare = +5 bonus. Drag back from the ball to roll (like golf).
+// ===========================================================================
+const PIN_R = 0.075;
+let BOWL_FRAMES = 5;
+let bowl = null;
+const pinGeo = new THREE.LatheGeometry([[0, 0], [0.045, 0.01], [0.07, 0.1], [0.06, 0.18], [0.035, 0.25], [0.032, 0.28], [0.042, 0.33], [0.035, 0.37], [0, 0.39]].map(([x, y]) => new THREE.Vector2(x, y)), 16);
+const pinMat = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.3 }), stripeMat = new THREE.MeshStandardMaterial({ color: "#ff3b3b", roughness: 0.4 });
+const stripeGeo = new THREE.CylinderGeometry(0.036, 0.036, 0.025, 16);
+function makePin() {
+  const g = new THREE.Group(), body = new THREE.Mesh(pinGeo, pinMat), stripe = new THREE.Mesh(stripeGeo, stripeMat);
+  stripe.position.y = 0.29; g.add(body, stripe); g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return netTrack(g, "pin", "#ffffff");
+}
+function pinDeck() { return [...grid.values()].find(p => p.type === "pins"); }
+function laneDir() { // tee → pin deck, on the ground
+  const st = findStart(), d = pinDeck(), [sx, sy] = cellCenter(st.x, st.y), [dx, dy] = cellCenter(d.x, d.y), l = Math.hypot(dx - sx, dy - sy) || 1;
+  return [(dx - sx) / l, (dy - sy) / l];
+}
+function setPins() {
+  for (const p of bowl.pins) scene.remove(p.mesh);
+  const d = pinDeck(), [cx, cy] = cellCenter(d.x, d.y), [fx, fy] = laneDir(), rx = fy, ry = -fx, z = d.lvl + TOP;
+  bowl.pins = [];
+  for (let r = 0; r < 4; r++) for (let i = 0; i <= r; i++) {
+    const along = r * 0.27 - 0.4, side = (i - r / 2) * 0.3, x = cx + fx * along + rx * side, y = cy + fy * along + ry * side;
+    const mesh = makePin(); mesh.position.set(x, z, -y); scene.add(mesh);
+    bowl.pins.push({ x, y, z, vx: 0, vy: 0, vz: 0, up: true, knocked: false, fall: 0, dir: 0, mesh, gone: false });
+  }
+}
+function placeBowlBall() {
+  const st = findStart(), [sx, sy] = cellCenter(st.x, st.y), b = bowl.ball;
+  Object.assign(b, { x: sx, y: sy, z: st.lvl + TOP, vx: 0, vy: 0, vz: 0, grounded: true, sunk: false, out: false });
+  bowl.ballMesh.visible = true;
+}
+function startBowl() {
+  const v = validity("bowl");
+  if (!v.ok) { toast(validityMessage(v, "bowl")); return; }
+  for (const pl of players) scene.remove(pl.mesh);
+  players = [];
+  const r = BALL_R * 1.5;
+  const ballMesh = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), new THREE.MeshStandardMaterial({ color: "#2f3e9e", roughness: 0.25, metalness: 0.2 }));
+  ballMesh.castShadow = true; scene.add(ballMesh); netTrack(ballMesh, "ball", "#2f3e9e", r);
+  const ball = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, grounded: true, sunk: false, out: false, r, fr: 0.32 };
+  for (let i = 0; i < playerCount; i++) players.push({ i, score: 0, frames: [], strikes: 0, spares: 0, done: false, ball, mesh: new THREE.Group() });
+  bowl = { frame: 1, roll: 1, pins: [], ball, ballMesh, phase: "aim", t: 0, firstRoll: 0 };
+  turn = 0; shotLive = false;
+  setPins(); placeBowlBall();
+  setMode("play");
+  toast(players.length > 1 ? `${PLAYER_NAMES[0]} bowls first` : "Bowl!");
+}
+function stopBowl() {
+  if (!bowl) return;
+  for (const p of bowl.pins) scene.remove(p.mesh);
+  scene.remove(bowl.ballMesh); bowl = null; aimGroup.visible = false;
+}
+function bowlRoll(dx, dy, power) {
+  if (!bowl || bowl.phase !== "aim") return;
+  bowl.ball.vx = dx * power; bowl.ball.vy = dy * power;
+  bowl.phase = "rolling"; bowl.t = 0; shotLive = true;
+}
+function updateBowl(dt) {
+  if (!bowl) return;
+  const b = bowl.ball, d = pinDeck();
+  if (bowl.phase === "rolling" || bowl.phase === "settle") {
+    bowl.t += dt;
+    for (let k = 0; k < 8; k++) {
+      if (bowl.ballMesh.visible) step(b, dt / 8);
+      for (const p of bowl.pins) {
+        if (p.gone) continue;
+        // ball hits pin
+        if (bowl.ballMesh.visible && Math.abs(b.z - p.z) < 0.5) {
+          const ddx = p.x - b.x, ddy = p.y - b.y, dd = Math.hypot(ddx, ddy), min = b.r + PIN_R;
+          if (dd > 0 && dd < min) {
+            const nx = ddx / dd, ny = ddy / dd, sp = Math.hypot(b.vx, b.vy);
+            p.knocked = true; p.vx = b.vx * 0.5 + nx * (1.2 + sp * 0.22); p.vy = b.vy * 0.5 + ny * (1.2 + sp * 0.22);
+            b.x = p.x - nx * min; b.y = p.y - ny * min; b.vx *= 0.9; b.vy *= 0.9;
+            const vn = b.vx * nx + b.vy * ny; if (vn > 0) { b.vx -= nx * vn * 0.2; b.vy -= ny * vn * 0.2; } // the ball deflects off each pin
+          }
+        }
+        // flying pins hit standing pins
+        if (p.knocked) for (const q of bowl.pins) {
+          if (q === p || q.knocked || q.gone) continue;
+          const ddx = q.x - p.x, ddy = q.y - p.y, dd = Math.hypot(ddx, ddy), sp = Math.hypot(p.vx, p.vy);
+          if (dd < PIN_R * 2.8 && sp > 0.7) { q.knocked = true; q.vx = p.vx * 0.45 + ddx / dd * sp * 0.4; q.vy = p.vy * 0.45 + ddy / dd * sp * 0.4; p.vx *= 0.65; p.vy *= 0.65; }
+        }
+      }
+    }
+    for (const p of bowl.pins) {
+      if (p.gone || !p.knocked) continue;
+      const sp = Math.hypot(p.vx, p.vy);
+      if (sp > 0.01) { p.dir = Math.atan2(p.vx, p.vy); const ns = Math.max(0, sp - 3 * dt); p.vx *= ns / sp; p.vy *= ns / sp; }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      const pr = { x: p.x, y: p.y, z: p.z, vx: p.vx, vy: p.vy, r: PIN_R };
+      for (const c of collidersNear(p.x, p.y)) collide(pr, c);
+      p.x = pr.x; p.y = pr.y; p.vx = pr.vx; p.vy = pr.vy;
+      const s = surfaceAt(p.x, p.y);
+      if (s === null) { p.vz -= G * dt; p.z += p.vz * dt; if (p.z < -3) { p.gone = true; scene.remove(p.mesh); } } else p.z = Math.max(s, p.z - 0.05);
+      p.fall = Math.min(1, p.fall + dt * 5);
+    }
+    // the ball is done when it stops, falls off, or rolls past the pins
+    const [fx, fy] = laneDir(), [cx, cy] = cellCenter(d.x, d.y);
+    const past = (b.x - cx) * fx + (b.y - cy) * fy > TILE * 0.55;
+    if (bowl.ballMesh.visible && (b.out || b.z < -2 || past || (b.grounded && Math.hypot(b.vx, b.vy) < 0.08 && bowl.t > 0.5))) { bowl.ballMesh.visible = false; bowl.phase = "settle"; bowl.t = 0; }
+    const pinsMoving = bowl.pins.some(p => !p.gone && p.knocked && Math.hypot(p.vx, p.vy) > 0.05);
+    if (bowl.phase === "settle" && (bowl.t > 2.5 || (!pinsMoving && bowl.t > 0.8))) bowlRollDone();
+  }
+  // draw
+  bowl.ballMesh.position.set(b.x, b.z + b.r, -b.y);
+  if (b.grounded) { bowl.ballMesh.rotation.x -= b.vy * dt / b.r; bowl.ballMesh.rotation.z -= b.vx * dt / b.r; }
+  for (const p of bowl.pins) {
+    if (p.gone) continue;
+    p.mesh.position.set(p.x, p.z, -p.y);
+    p.mesh.rotation.set(0, 0, 0);
+    if (p.knocked) { p.mesh.rotation.y = p.dir; p.mesh.rotateX(-p.fall * 1.45); }
+  }
+  // camera behind the ball, looking down the lane
+  const [fx, fy] = laneDir(), focus = bowl.phase === "aim" || bowl.ballMesh.visible ? [b.x, b.y, b.z] : (() => { const [x, y] = cellCenter(d.x, d.y); return [x - fx * 2, y - fy * 2, d.lvl]; })();
+  const k = Math.min(1, dt * 3), portrait = innerWidth < innerHeight;
+  controls.target.lerp(tmpA.set(focus[0] + fx * 3, focus[2] + 0.3, -(focus[1] + fy * 3)), k);
+  camera.position.lerp(tmpB.set(focus[0] - fx * (portrait ? 6 : 4.5), focus[2] + (portrait ? 4.2 : 3.2), -(focus[1] - fy * (portrait ? 6 : 4.5))), k);
+  camera.lookAt(controls.target);
+  updateAimArrow(b, dt);
+}
+function bowlRollDone() {
+  const pl = players[turn];
+  const down = bowl.pins.filter(p => p.knocked || p.gone).length;
+  const newly = down - (bowl.roll === 2 ? bowl.firstRoll : 0);
+  shotLive = false;
+  if (bowl.roll === 1) {
+    bowl.firstRoll = down;
+    if (down === 10) { pl.score += 20; pl.strikes++; pl.frames.push("X"); toast("STRIKE!"); burstAtPins(); nextBowler(); return; }
+    toast(`${newly} pin${newly === 1 ? "" : "s"}`);
+    // clear knocked pins, keep standing ones, roll again
+    for (const p of bowl.pins) if (p.knocked && !p.gone) { p.gone = true; scene.remove(p.mesh); }
+    bowl.roll = 2; bowl.phase = "aim"; placeBowlBall(); renderHud();
+  } else {
+    const total = down;
+    if (total === 10) { pl.score += 15; pl.spares++; pl.frames.push("/"); toast("SPARE!"); burstAtPins(); }
+    else { pl.score += total; pl.frames.push(String(total)); toast(`${newly} more · ${total} this frame`); }
+    nextBowler();
+  }
+}
+function burstAtPins() { const d = pinDeck(), [x, y] = cellCenter(d.x, d.y); burst(x, y, d.lvl + 0.6, "#ff3b3b"); burst(x, y, d.lvl + 0.6, "#ffd23f"); }
+function nextBowler() {
+  bowl.phase = "wait";
+  setTimeout(() => {
+    if (!bowl) return;
+    turn = (turn + 1) % players.length;
+    if (turn === 0) bowl.frame++;
+    if (bowl.frame > BOWL_FRAMES) { players.forEach(p => p.done = true); showResults(); return; }
+    bowl.roll = 1; bowl.firstRoll = 0; setPins(); placeBowlBall(); bowl.phase = "aim";
+    if (players.length > 1) toast(`${PLAYER_NAMES[players[turn].i]}'s turn`);
+    renderHud();
+  }, 1200);
+  renderHud();
+}
+// Shared aim arrow (golf and bowling)
+function updateAimArrow(b, dt) {
+  if (!aiming) { aimGroup.visible = false; return; }
+  const dx = aiming.start[0] - aiming.cur[0], dy = aiming.start[1] - aiming.cur[1];
+  const len = Math.hypot(dx, dy), power = Math.min(MAX_SHOT * SHOT_MULT, len * 3.2 * SHOT_MULT), L = 0.4 + power * 0.28;
+  aimGroup.visible = power > 0.4;
+  if (len > 0) {
+    aimGroup.position.set(b.x, b.z + 0.05, -b.y);
+    aimGroup.rotation.y = Math.atan2(-dx, dy);
+    const R = b.r || BALL_R;
+    shaft.scale.z = L; shaft.position.z = -L / 2 - R; head.position.z = -L - R - 0.2;
+    aimMat.color.setHSL(0.33 - 0.33 * (power / (MAX_SHOT * SHOT_MULT)), 0.9, 0.55);
+  }
+}
+// Random lane: a straight lane from the tee to the pin deck, sometimes up a ramp.
+function randomBowlLayout() {
+  const out = [], x = rint(2, 7), L = rint(6, 8), rampAt = Math.random() < 0.45 ? rint(2, L - 3) : -1;
+  out.push(["start", x, 0, 0, 0]);
+  for (let y = 1; y < L; y++) {
+    const lvl = rampAt >= 0 && y > rampAt ? 1 : 0;
+    out.push(y === rampAt ? ["ramp", x, y, 0, 0] : ["floor", x, y, lvl, 0]);
+  }
+  out.push(["pins", x, L, rampAt >= 0 ? 1 : 0, 0]);
+  return out;
+}
+
+// ===========================================================================
+// KING OF THE HILL: stay on the very top tiles to score. Tap to dash and shove; robots shove back.
+// Falling off sends you back to the bottom. Each player gets a turn; most seconds on top wins.
+// ===========================================================================
+let KOTH_TIME = 45;
+let koth = null;
+function crownLevel() { return Math.max(...[...grid.values()].map(p => p.lvl)); }
+function onCrown(a) { const p = grid.get(key(...toCell(a.x, a.y))); return !!p && a.grounded && p.lvl === koth.top && p.type !== "ramp"; }
+function lowCell() {
+  const low = [...grid.values()].filter(p => p.lvl === 0 && p.type !== "ramp" && p.type !== "spinner");
+  const p = low[rint(0, low.length - 1)] || [...grid.values()][0], [x, y] = cellCenter(p.x, p.y);
+  return [x, y, p.lvl + TOP];
+}
+// Route to the top: for every tile, which neighbour leads up (via ramps). Walking down is always fine.
+function canStep(a, b) {
+  const [ax, ay] = cellCenter(a.x, a.y), dx = b.x - a.x, dy = b.y - a.y, ex = ax + dx * TILE / 2, ey = ay + dy * TILE / 2;
+  const ha = surfaceAt(ex - dx * 0.05, ey - dy * 0.05), hb = surfaceAt(ex + dx * 0.05, ey + dy * 0.05);
+  if (ha === null || hb === null || hb > ha + 0.15) return false;
+  const dirIndex = (ddx, ddy) => DIRS.findIndex(([x, y]) => x === ddx && y === ddy);
+  if (a.type === "wall" && a.rot === dirIndex(dx, dy)) return false;
+  if (b.type === "wall" && b.rot === dirIndex(-dx, -dy)) return false;
+  return true;
+}
+function buildHillRoutes() {
+  const next = new Map(), queue = [];
+  for (const p of grid.values()) if (p.lvl === koth.top && p.type !== "ramp") { next.set(key(p.x, p.y), null); queue.push(p); }
+  while (queue.length) {
+    const c = queue.shift();
+    for (const [dx, dy] of DIRS) {
+      const n = grid.get(key(c.x + dx, c.y + dy));
+      if (!n || next.has(key(n.x, n.y)) || !canStep(n, c)) continue;
+      next.set(key(n.x, n.y), c); queue.push(n);
+    }
+  }
+  koth.routes = next;
+}
+function startKoth() {
+  const v = validity("koth");
+  if (!v.ok) { toast(validityMessage(v, "koth")); return; }
+  stopAvatarGames();
+  for (const pl of players) scene.remove(pl.mesh);
+  players = [];
+  for (let i = 0; i < playerCount; i++) players.push({ i, score: 0, done: false, mesh: new THREE.Group() });
+  turn = 0;
+  koth = { you: null, bots: [], timeLeft: KOTH_TIME, running: false, top: crownLevel(), routes: null };
+  buildHillRoutes();
+  kerbsDirty = true; // no rails in this game: you can get shoved off
+  setMode("play");
+  readyKothTurn();
+}
+function readyKothTurn() {
+  const pl = players[turn];
+  removeAvatar(koth.you); koth.bots.forEach(removeAvatar); koth.bots = [];
+  const [x, y, z] = lowCell(); koth.you = newAvatar(PLAYER_COLORS[pl.i], x, y, z, { dashT: 0, dashCd: 0 });
+  for (let k = 0; k < 3; k++) { const [bx, by, bz] = lowCell(); koth.bots.push(newAvatar(ROBOT_COLORS[k], bx, by, bz, { robot: true, r: 0.32, dashT: 0, dashCd: 1 + Math.random() * 2, crown: 0 })); }
+  koth.timeLeft = KOTH_TIME; koth.running = false;
+  sheet(`<h2>${players.length > 1 ? esc(PLAYER_NAMES[pl.i]) + "'s turn" : "Ready?"}</h2>
+    <p>Left thumb: run. Tap the right side: dash and shove. Stand on the very top to score. ${KOTH_TIME} seconds.</p>
+    <button class="btn primary" id="goKoth">Go!</button>`, (h, close) => { h.querySelector("#goKoth").onclick = () => { close(); koth.running = true; renderHud(); }; });
+  renderHud();
+}
+function kothDash(a, dirX, dirY) {
+  if (a.dashCd > 0) return;
+  let l = Math.hypot(dirX, dirY);
+  if (l < 0.1) { dirX = -Math.sin(a.mesh.rotation.y); dirY = Math.cos(a.mesh.rotation.y); l = 1; }
+  a.kx += dirX / l * 9; a.ky += dirY / l * 9; a.dashT = 0.35; a.dashCd = 1.1;
+}
+function kothYouDash() { if (koth && koth.running) { const y = koth.you; kothDash(y, y.vx, y.vy); } }
+function updateKoth(dt) {
+  if (!koth || !koth.you) return;
+  const you = koth.you, pl = players[turn], all = [you, ...koth.bots];
+  const [mx, my] = koth.running ? activeStick() : [0, 0];
+  you.wantX = mx * AV_SPEED * AVATAR_SPEED; you.wantY = my * AV_SPEED * AVATAR_SPEED;
+  const crownCells = [...grid.values()].filter(p => p.lvl === koth.top && p.type !== "ramp");
+  for (const b of koth.bots) {
+    // Head for the top; once there, shove anyone else who's up there.
+    const c = crownCells.reduce((best, p) => { const [x, y] = cellCenter(p.x, p.y), d = Math.hypot(x - b.x, y - b.y); return !best || d < best.d ? { x, y, d } : best; }, null);
+    let tx = c ? c.x : b.x, ty = c ? c.y : b.y;
+    const here = grid.get(key(...toCell(b.x, b.y))), step = here && koth.routes.get(key(here.x, here.y));
+    if (step) [tx, ty] = cellCenter(step.x, step.y); // follow the route up the ramps
+    if (onCrown(b)) {
+      const rival = all.find(o => o !== b && onCrown(o) && Math.hypot(o.x - b.x, o.y - b.y) < 2.6);
+      if (rival) { tx = rival.x; ty = rival.y; if (Math.hypot(rival.x - b.x, rival.y - b.y) < 1.6) kothDash(b, rival.x - b.x, rival.y - b.y); }
+    }
+    const dx = tx - b.x, dy = ty - b.y, d = Math.hypot(dx, dy), sp = koth.running ? AV_SPEED * 0.62 * AVATAR_SPEED : 0;
+    b.wantX = d > 0.25 ? dx / d * sp : 0; b.wantY = d > 0.25 ? dy / d * sp : 0;
+  }
+  for (const a of all) {
+    a.dashT = Math.max(0, a.dashT - dt); a.dashCd = Math.max(0, a.dashCd - dt);
+    stepAvatar(a, dt);
+    if (a.fell) { const [x, y, z] = lowCell(); Object.assign(a, { x, y, z, vx: 0, vy: 0, kx: 0, ky: 0 }); a.flash = 0.8; if (a === you) toast("Shoved off!"); }
+  }
+  // Shoves: a dashing body knocks others away
+  for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+    const a = all[i], b = all[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+    if (d === 0 || d > a.r + b.r + 0.05 || Math.abs(a.z - b.z) > 0.6) continue;
+    const nx = dx / d, ny = dy / d;
+    if (a.dashT > 0) { b.kx += nx * 7; b.ky += ny * 7; a.dashT = 0; }
+    if (b.dashT > 0) { a.kx -= nx * 7; a.ky -= ny * 7; b.dashT = 0; }
+  }
+  pushApart(all);
+  if (koth.running && onCrown(you)) { const before = Math.floor(pl.score); pl.score += dt; if (Math.floor(pl.score) !== before) renderHud(); }
+  for (const a of all) drawAvatar(a, dt);
+  followCam(you.x, you.y, you.z, dt, 1.15);
+  if (koth.running) {
+    const before = Math.ceil(koth.timeLeft); koth.timeLeft -= dt;
+    if (Math.ceil(koth.timeLeft) !== before) renderHud();
+    if (koth.timeLeft <= 0) {
+      koth.running = false; clearSticks(); pl.done = true;
+      const next = players.findIndex(p => !p.done);
+      if (next < 0) setTimeout(showResults, 500); else { turn = next; toast("Time!"); setTimeout(readyKothTurn, 900); }
+    }
+  }
+}
+// Random hill: a stepped pyramid with a flat apron around it. Ramps are always entered from a tile at their
+// low end: the apron feeds the ramps up to level 1, and each ramp to the top has a level-1 landing behind it.
+function randomHillLayout() {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const cx = rint(3, 5), cy = rint(3, 5), cells = new Map();
+    const ringOf = (x, y) => Math.max(Math.abs(x - cx - 0.5), Math.abs(y - cy - 0.5)); // 0.5 crown … 3.5 apron
+    for (let x = cx - 3; x <= cx + 4; x++) for (let y = cy - 3; y <= cy + 4; y++) {
+      const r = ringOf(x, y);
+      cells.set(key(x, y), { x, y, lvl: r < 1 ? 2 : r < 2 ? 1 : 0, t: "floor", rot: 0, ring: r });
+    }
+    const at = (x, y) => cells.get(key(x, y));
+    const sideSpots = (ring, towardRing) => {
+      const out = [];
+      for (const c of cells.values()) if (c.ring === ring && c.t === "floor") DIRS.forEach(([dx, dy], rot) => {
+        const n = at(c.x + dx, c.y + dy), back = at(c.x - dx, c.y - dy);
+        if (n && n.ring === towardRing && back && back.ring === ring + 1) out.push({ c, rot, n, back });
+      });
+      return out;
+    };
+    // ramps to the top (level 1 → 2), each with a raised landing behind it
+    const up = sideSpots(1.5, 0.5);
+    for (let i = 0; i < 2 && up.length; i++) {
+      const { c, rot, back } = up.splice(rint(0, up.length - 1), 1)[0];
+      if (back.t !== "floor" || back.lvl !== 0) continue;
+      c.t = "ramp"; c.rot = rot; back.lvl = 1; back.landing = true;
+      // join the landing to the rest of level 1 with one raised side step
+      const [dx, dy] = DIRS[rot], side = at(back.x + dy, back.y - dx) || at(back.x - dy, back.y + dx);
+      if (side && side.t === "floor" && side.ring === 2.5) { side.lvl = 1; side.landing = true; }
+    }
+    // ramps up to level 1 from the apron
+    const low = sideSpots(2.5, 1.5).filter(s => !s.c.landing && s.n.t === "floor" && s.n.lvl === 1);
+    for (let i = 0; i < 3 && low.length; i++) {
+      const { c, rot } = low.splice(rint(0, low.length - 1), 1)[0];
+      if (c.t !== "floor" || c.landing) continue;
+      c.t = "ramp"; c.rot = rot;
+    }
+    const out = [];
+    let tee = false, bumpers = 0;
+    for (const c of cells.values()) {
+      if (c.t === "ramp") { out.push(["ramp", c.x, c.y, c.lvl, c.rot]); continue; }
+      if (!tee && c.ring > 3) { out.push(["start", c.x, c.y, 0, 0]); tee = true; continue; }
+      if (c.ring > 3 && bumpers < 2 && Math.random() < 0.08) { out.push(["bouncer", c.x, c.y, 0, 0]); bumpers++; continue; }
+      out.push(["floor", c.x, c.y, c.lvl, 0]);
+    }
+    if (hillClimbable(out)) return out;
+  }
+  return out_fallback();
+  function out_fallback() { return [["start", 1, 1, 0, 0], ["floor", 2, 1, 0, 0], ["ramp", 3, 1, 0, 3], ["floor", 4, 1, 1, 0], ["floor", 5, 1, 1, 0], ["floor", 4, 2, 1, 0], ["floor", 2, 2, 0, 0], ["floor", 1, 2, 0, 0]]; }
+}
+// Check a hill layout by loading it and seeing whether the ground can reach the top.
+function hillClimbable(list) {
+  const saved = [...grid.values()].map(p => [p.type, p.x, p.y, p.lvl, p.rot]);
+  loadList(list);
+  const top = Math.max(...list.map(p => p[3])), seen = new Set(), queue = [];
+  for (const p of grid.values()) if (p.lvl === top && p.type !== "ramp") { seen.add(key(p.x, p.y)); queue.push(p); }
+  while (queue.length) {
+    const c = queue.shift();
+    for (const [dx, dy] of DIRS) { const n = grid.get(key(c.x + dx, c.y + dy)); if (n && !seen.has(key(n.x, n.y)) && canStep(n, c)) { seen.add(key(n.x, n.y)); queue.push(n); } }
+  }
+  const ok = [...grid.values()].filter(p => p.lvl === 0 && p.type !== "ramp").every(p => seen.has(key(p.x, p.y)));
+  loadList(saved);
+  return ok;
+}
+
+// ===========================================================================
+// BEACH FISHING: stand at the end of a pier, drag back and let go to cast. A fish bites 10–45 s after the
+// bobber lands. Tap to hook it, then HOLD to reel and LET GO when the line gets too tight. Each kind of fish
+// fights differently (strength, sudden runs, how fast it swims off). Most fish in the time limit wins.
+// ===========================================================================
+let fishMinutes = 2, FISH_TIME = 120, FISH_BITE = [10, 45], FISH_BIG = 1;
+const FISH_TYPES = [
+  { id: "minnow", name: "Minnow", color: "#c9d6e3", s: 0.15, kg: [0.1, 0.3], w: (d) => Math.max(1, 26 - d) },
+  { id: "mackerel", name: "Mackerel", color: "#3a7bd5", s: 0.35, kg: [0.5, 2], w: () => 18 },
+  { id: "snapper", name: "Red Snapper", color: "#ff6b5b", s: 0.55, kg: [2, 6], w: (d) => d * 0.9 },
+  { id: "tuna", name: "Tuna", color: "#1d3557", s: 0.78, kg: [10, 40], w: (d) => Math.max(0, d - 12) * 1.2 * FISH_BIG },
+  { id: "shark", name: "Shark", color: "#8d99ae", s: 0.88, kg: [40, 120], w: (d) => Math.max(0, d - 19) * 0.7 * FISH_BIG },
+  { id: "gold", name: "Golden Fish", color: "#ffd23f", s: 0.68, kg: [1, 3], w: () => 2 },
+];
+const PIER_END = new THREE.Vector3(0, 0.95, -9.4); // where the fisher stands (three.js coordinates)
+let beach = null, fish = null;
+function waveY(x, z, t) { return Math.sin(x * 0.35 + t * 1.3) * 0.12 + Math.cos(z * 0.28 + t * 1.1) * 0.1; }
+function buildBeach() {
+  if (beach) return beach;
+  const g = new THREE.Group();
+  const sand = new THREE.Mesh(new THREE.PlaneGeometry(90, 30), new THREE.MeshLambertMaterial({ color: "#f2d58c" }));
+  sand.rotation.x = -Math.PI / 2; sand.position.set(0, 0.02, 10); sand.receiveShadow = true; g.add(sand);
+  const wet = new THREE.Mesh(new THREE.PlaneGeometry(90, 3), new THREE.MeshLambertMaterial({ color: "#d9bd78" }));
+  wet.rotation.x = -Math.PI / 2; wet.position.set(0, 0.03, -3.5); g.add(wet);
+  const waterGeo = new THREE.PlaneGeometry(120, 70, 60, 36); waterGeo.rotateX(-Math.PI / 2);
+  const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: "#0b5f99", roughness: 0.3, metalness: 0.1, flatShading: true }));
+  water.position.set(0, 0, -40); water.receiveShadow = true; g.add(water);
+  g.userData.water = water;
+  // pier
+  const wood = new THREE.MeshLambertMaterial({ color: "#a8743f" }), dark = new THREE.MeshLambertMaterial({ color: "#7a5230" });
+  for (let i = 0; i < 9; i++) { const plank = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.9), i % 2 ? wood : dark); plank.position.set(0, 0.85, -2.2 - i * 0.95); plank.castShadow = plank.receiveShadow = true; g.add(plank); }
+  for (const z of [-2.5, -5.5, -8.5]) for (const x of [-1, 1]) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.2, 8), dark); post.position.set(x, -0.1, z); g.add(post); }
+  // palm trees
+  const leafMat = new THREE.MeshLambertMaterial({ color: "#3fbf55", side: THREE.DoubleSide }), trunkMat = new THREE.MeshLambertMaterial({ color: "#9c6b3a" });
+  for (const [x, z, lean] of [[-7, 4, 0.25], [8, 6, -0.3], [-12, 9, 0.15]]) {
+    const palm = new THREE.Group();
+    for (let s = 0; s < 6; s++) { const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.22, 0.75, 8), trunkMat); seg.position.set(lean * s * 0.5, 0.37 + s * 0.72, 0); seg.rotation.z = -lean * 0.4; seg.castShadow = true; palm.add(seg); }
+    for (let l = 0; l < 6; l++) { const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.45, 2.4, 4), leafMat); leaf.position.set(lean * 3, 4.4, 0); leaf.rotation.set(Math.PI / 2 - 0.5, 0, 0); leaf.rotation.y = 0; const holder = new THREE.Group(); holder.position.set(lean * 3, 4.4, 0); leaf.position.set(0, 0, 0); leaf.translateY(-1.1); holder.add(leaf); holder.rotation.y = l * Math.PI / 3; holder.rotation.x = 0; palm.add(holder); leaf.castShadow = true; }
+    palm.position.set(x, 0, z); g.add(palm);
+  }
+  // umbrella + towel
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 8), new THREE.MeshLambertMaterial({ color: "#ffffff" })); pole.position.set(4, 1.2, 2); g.add(pole);
+  for (let i = 0; i < 8; i++) { const s = new THREE.Mesh(new THREE.ConeGeometry(1.6, 0.6, 3, 1, true, i * Math.PI / 4, Math.PI / 4), new THREE.MeshLambertMaterial({ color: i % 2 ? "#ff3b3b" : "#ffffff", side: THREE.DoubleSide })); s.position.set(4, 2.4, 2); s.castShadow = true; g.add(s); }
+  const towel = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.03, 2), new THREE.MeshLambertMaterial({ color: "#2fa8ff" })); towel.position.set(5.2, 0.05, 2.6); towel.rotation.y = 0.3; g.add(towel);
+  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(5, 24, 16), new THREE.MeshBasicMaterial({ color: "#fff3b0" })); sunMesh.position.set(38, 16, -90); g.add(sunMesh);
+  g.visible = false; scene.add(g);
+  beach = g; return g;
+}
+function animateBeach(t) {
+  if (!beach || !beach.visible) return;
+  const pos = beach.userData.water.geometry.attributes.position, wz = beach.userData.water.position.z;
+  for (let i = 0; i < pos.count; i++) pos.setY(i, waveY(pos.getX(i), pos.getZ(i) + wz, t));
+  pos.needsUpdate = true; beach.userData.water.geometry.computeVertexNormals();
+}
+function showBeach(on) { buildBeach().visible = on; scene.fog.near = on ? 60 : 40; scene.fog.far = on ? 140 : 80; }
+const bobberGeoTop = new THREE.SphereGeometry(0.13, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), bobberGeoBot = new THREE.SphereGeometry(0.13, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+function makeBobber() { const g = new THREE.Group(); g.scale.setScalar(1.8); g.add(new THREE.Mesh(bobberGeoTop, new THREE.MeshStandardMaterial({ color: "#ff3b3b" })), new THREE.Mesh(bobberGeoBot, new THREE.MeshStandardMaterial({ color: "#ffffff" }))); return netTrack(g, "bobber", "#ff3b3b"); }
+function makeFishMesh(color) {
+  const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color, roughness: 0.35, metalness: 0.2 });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 10), mat); body.scale.set(0.55, 0.7, 1.4);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.3, 4), mat); tail.rotation.x = -Math.PI / 2; tail.position.z = 0.38;
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), darkMat); eye.position.set(0.1, 0.05, -0.18);
+  const eye2 = eye.clone(); eye2.position.x = -0.1;
+  g.add(body, tail, eye, eye2); g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return netTrack(g, "fish", color);
+}
+function makeRod() {
+  const g = new THREE.Group(), rod = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.03, 2.2, 6), new THREE.MeshStandardMaterial({ color: "#46566a" }));
+  rod.position.y = 1.1; g.add(rod); return netTrack(g, "rod", "#46566a");
+}
+const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+const fishLine = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: "#ffffff" }));
+fishLine.visible = false; scene.add(fishLine);
+function setLine(a, b) { const p = lineGeo.attributes.position; p.setXYZ(0, a.x, a.y, a.z); p.setXYZ(1, b.x, b.y, b.z); p.needsUpdate = true; fishLine.visible = true; }
+
+function startFish() {
+  for (const pl of players) scene.remove(pl.mesh);
+  stopFish();
+  players = [];
+  for (let i = 0; i < playerCount; i++) players.push({ i, score: 0, kg: 0, best: null, done: false, mesh: new THREE.Group() });
+  turn = 0;
+  fish = { state: "ready", timeLeft: FISH_TIME, running: false, fisher: null, rod: null, bobber: makeBobber(), catchMesh: null, t: 0, castTo: null, fishType: null };
+  fish.bobber.visible = false; scene.add(fish.bobber);
+  setMode("play");
+  readyFishTurn();
+}
+function stopFish() {
+  if (!fish) return;
+  removeAvatar(fish.fisher); for (const m of [fish.rod, fish.bobber, fish.catchMesh]) if (m) scene.remove(m);
+  fishLine.visible = false; fish = null;
+}
+function readyFishTurn() {
+  const pl = players[turn];
+  removeAvatar(fish.fisher); if (fish.rod) scene.remove(fish.rod);
+  fish.fisher = newAvatar(PLAYER_COLORS[pl.i], PIER_END.x, -PIER_END.z, PIER_END.y);
+  fish.fisher.mesh.rotation.y = 0;
+  fish.rod = makeRod(); scene.add(fish.rod);
+  fish.state = "ready"; fish.timeLeft = FISH_TIME; fish.running = false; fish.bobber.visible = false; fishLine.visible = false;
+  sheet(`<h2>${players.length > 1 ? esc(PLAYER_NAMES[pl.i]) + "'s turn" : "Ready?"}</h2>
+    <p>Drag back and let go to cast. When the bobber dips, tap fast to hook the fish. Then hold to reel, and let go if the line gets too tight. ${Math.round(FISH_TIME / 60)} minute${FISH_TIME > 60 ? "s" : ""}.</p>
+    <button class="btn primary" id="goFish">Go fishing!</button>`, (h, close) => { h.querySelector("#goFish").onclick = () => { close(); fish.running = true; renderHud(); }; });
+  renderHud();
+}
+const rodTip = new THREE.Vector3();
+function fishPointer(type, ev) {
+  if (!fish || !fish.running) return;
+  if (type === "down") {
+    if (fish.state === "ready") fish.drag = { x: ev.clientX, y: ev.clientY, cx: ev.clientX, cy: ev.clientY };
+    else if (fish.state === "bite") fishHook();
+    else if (fish.state === "reel") fish.holding = true;
+  } else if (type === "move") {
+    if (fish.drag) { fish.drag.cx = ev.clientX; fish.drag.cy = ev.clientY; }
+  } else {
+    if (fish.drag && fish.state === "ready") {
+      const dy = fish.drag.cy - fish.drag.y, dx = fish.drag.cx - fish.drag.x; fish.drag = null;
+      if (dy > 15) fishCast(Math.min(1, dy / 220), Math.max(-0.6, Math.min(0.6, -dx / 300)));
+    }
+    fish.holding = false;
+  }
+}
+function fishCast(power, angle) {
+  const dist = 6 + power * 24, a = angle;
+  fish.castTo = new THREE.Vector3(PIER_END.x + Math.sin(a) * dist, 0, PIER_END.z - Math.cos(a) * dist);
+  fish.castDist = dist; fish.state = "flying"; fish.t = 0;
+  fish.bobber.visible = true;
+}
+function pickFish(d) {
+  const ws = FISH_TYPES.map(f => Math.max(0, f.w(d))), total = ws.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < ws.length; i++) { r -= ws[i]; if (r <= 0) return FISH_TYPES[i]; }
+  return FISH_TYPES[0];
+}
+function fishHook() {
+  const f = fish.fishType;
+  fish.state = "reel"; fish.tension = 0.2; fish.dist = fish.castDist; fish.startDist = fish.castDist;
+  fish.run = 0; fish.nextRun = (1 + Math.random() * 2.5) / (0.5 + f.s); fish.holding = false;
+  toast("Hooked!"); renderHud();
+}
+function fishLost(msg) { fish.state = "ready"; fish.bobber.visible = false; fishLine.visible = false; toast(msg); renderHud(); }
+function updateFish(dt) {
+  if (!fish || !fish.fisher) return;
+  const pl = players[turn], t = time;
+  // fisher + rod
+  drawAvatar(fish.fisher, dt);
+  rodTip.set(PIER_END.x + 0.25, PIER_END.y + 0.6, PIER_END.z - 0.2);
+  fish.rod.position.copy(rodTip); fish.rod.rotation.set(-0.9 + (fish.state === "reel" ? Math.sin(t * 20) * 0.04 + (fish.holding ? 0.25 : 0) : 0), 0, 0);
+  const tip = new THREE.Vector3(0, 2.2, 0).applyEuler(fish.rod.rotation).add(rodTip);
+  const b = fish.bobber;
+  if (fish.state === "flying") {
+    fish.t += dt; const k = Math.min(1, fish.t / 1.1);
+    b.position.lerpVectors(tip, fish.castTo, k); b.position.y += Math.sin(k * Math.PI) * 4;
+    if (k >= 1) { fish.state = "wait"; fish.biteIn = FISH_BITE[0] + Math.random() * (FISH_BITE[1] - FISH_BITE[0]); fish.fishType = pickFish(fish.castDist); renderHud(); }
+  } else if (fish.state === "wait" || fish.state === "bite") {
+    const wy = waveY(fish.castTo.x, fish.castTo.z, t);
+    b.position.set(fish.castTo.x, wy + 0.05, fish.castTo.z);
+    if (fish.running && fish.state === "wait" && (fish.biteIn -= dt) <= 0) {
+      fish.state = "bite"; fish.biteWindow = 2.1 - fish.fishType.s * 0.9;
+      toast("!"); burst(b.position.x, -b.position.z, 0.3, "#ffffff"); renderHud();
+    }
+    if (fish.state === "bite") {
+      b.position.y = wy - 0.18 + Math.sin(t * 25) * 0.08; // bobber dunks and shakes
+      if ((fish.biteWindow -= dt) <= 0) fishLost("Too slow! It got away");
+    }
+  } else if (fish.state === "reel") {
+    const f = fish.fishType;
+    // sudden runs: the fish pulls hard for a moment
+    if (fish.run > 0) fish.run -= dt; else if ((fish.nextRun -= dt) <= 0) { fish.run = 0.5 + f.s * 1.1; fish.nextRun = (1.5 + Math.random() * 2.5) / (0.5 + f.s); }
+    const running = fish.run > 0;
+    // Stronger fish: the line tightens faster, you reel slower, and it swims off faster when you let go.
+    if (fish.holding) {
+      fish.tension += (0.2 + f.s * 0.6 + (running ? 0.8 : 0)) * dt;
+      fish.dist -= 4.5 * (1 - f.s * 0.3) * (running ? 0.3 : 1) * dt;
+    } else {
+      fish.tension = Math.max(0, fish.tension - 0.9 * dt);
+      fish.dist += (0.2 + f.s * 0.7) * (running ? 2 : 1) * dt;
+    }
+    const ratio = Math.max(0, fish.dist) / fish.startDist, wobble = running ? Math.sin(t * 9) * 1.2 : Math.sin(t * 3) * 0.4;
+    const px = PIER_END.x + (fish.castTo.x - PIER_END.x) * ratio + wobble, pz = PIER_END.z + (fish.castTo.z - PIER_END.z) * ratio;
+    b.position.set(px, waveY(px, pz, t) - (running ? 0.15 : 0.02), pz);
+    if (fish.tension >= 1) fishLost("Snap! The line broke");
+    else if (fish.dist > fish.startDist + 5) fishLost(`The ${f.name.toLowerCase()} got away`);
+    else if (fish.dist <= 0.8) fishCaught();
+    if (Math.floor(t * 10) !== Math.floor((t - dt) * 10)) renderHud(); // live tension bar
+  } else if (fish.state === "show") {
+    fish.t += dt; const m = fish.catchMesh, k = Math.min(1, fish.t / 0.9);
+    m.position.lerpVectors(fish.catchFrom, tip, k); m.position.y += Math.sin(k * Math.PI) * 2.5; m.rotation.z = Math.sin(t * 18) * 0.5;
+    if (fish.t > 1.6) { scene.remove(m); fish.catchMesh = null; fish.state = "ready"; renderHud(); }
+  }
+  if (b.visible) setLine(tip, b.position); else fishLine.visible = false;
+  // camera behind the fisher, looking out to sea
+  const portrait = innerWidth < innerHeight, k = Math.min(1, dt * 3);
+  const look = fish.state === "reel" || fish.state === "wait" || fish.state === "bite" ? b.position : tmpB.set(0, 0, PIER_END.z - 12);
+  controls.target.lerp(tmpA.set(look.x * 0.5, 0.3, (look.z + PIER_END.z) * 0.5 - 2), k);
+  camera.position.lerp(tmpA.set(PIER_END.x + 2.2, PIER_END.y + (portrait ? 7.5 : 5.2), PIER_END.z + (portrait ? 11 : 8)), k);
+  camera.lookAt(controls.target);
+  if (fish.running) {
+    const before = Math.ceil(fish.timeLeft); fish.timeLeft -= dt;
+    if (Math.ceil(fish.timeLeft) !== before) renderHud();
+    if (fish.timeLeft <= 0) {
+      fish.running = false; pl.done = true; fish.bobber.visible = false; fish.state = "ready";
+      const next = players.findIndex(p => !p.done);
+      if (next < 0) setTimeout(showResults, 600); else { turn = next; toast("Time!"); setTimeout(readyFishTurn, 1000); }
+    }
+  }
+}
+function fishCaught() {
+  const f = fish.fishType, pl = players[turn], kg = Math.round((f.kg[0] + Math.random() * (f.kg[1] - f.kg[0])) * 10) / 10;
+  pl.score++; pl.kg = Math.round((pl.kg + kg) * 10) / 10;
+  if (!pl.best || kg > pl.best.kg) pl.best = { name: f.name, kg };
+  fish.state = "show"; fish.t = 0; fish.bobber.visible = false;
+  fish.catchMesh = makeFishMesh(f.color); fish.catchMesh.scale.setScalar(Math.min(3, 0.8 + Math.sqrt(kg) * 0.25)); scene.add(fish.catchMesh);
+  fish.catchFrom = fish.bobber.position.clone();
+  burst(fish.catchFrom.x, -fish.catchFrom.z, 0.5, f.color);
+  toast(`${f.name}! ${kg} kg`); renderHud();
+}
+
 // ---------------------------------------------------------------------------
 // Home screen ("the toy box shelf") and smooth switching between games.
 // Screens: home → (game preview + lobby card) → play → results → again / random / home.
@@ -2701,14 +3365,17 @@ const GAME_CARDS = [
   { id: "splat", title: "Splat Tag", desc: "Run around and splat the robots before they splat you.", tag: "Shooter · New", tint: "#ff4fa0" },
   { id: "race", title: "Obstacle Race", desc: "Sprint, jump the gaps and dodge spinners to the flag.", tag: "Race · New", tint: "#ffd23f" },
   { id: "pitch", title: "Pitch Ball", desc: "Kick the big ball into the other net. Two players on one screen.", tag: "Sports · New", tint: "#3fbf55" },
+  { id: "bowl", title: "Bumper Bowling", desc: "Roll down the lane into 10 pins. The rails are bumpers, so every roll counts.", tag: "Sports · New", tint: "#e8c07a" },
+  { id: "koth", title: "King of the Hill", desc: "Climb to the top and stay there. Dash to shove robots off the edge.", tag: "Action · New", tint: "#8a5cff" },
+  { id: "fish", title: "Beach Fishing", desc: "Cast off the pier, wait for a bite, and reel in the biggest fish. Most fish wins.", tag: "Chill · New", tint: "#2aa3d6" },
   { id: "together", title: "Play Together", desc: "Play any game with a friend on their own screen: in the same room, or far away online with a code.", tag: "Online · New", tint: "#2fa8ff" },
   { id: "random", title: "Random Game", desc: "A surprise game, a surprise arena and surprise rules. Every time.", tag: "Surprise", tint: "#8a5cff" },
   { id: "maker", title: "Game Maker", desc: "Pick a game, mix in rule twists, name it and share it.", tag: "Make · New", tint: "#1d2b3a" },
   { id: "workshop", title: "Workshop", desc: "Build your own arena from toy pieces, then play any game in it.", tag: "Build", tint: "#ff8a3d" },
 ];
 const SOON_CARDS = [
-  { title: "Bumper Bowling", desc: "Roll down a lane you built into ten pins.", tint: "#ff8a3d" },
-  { title: "King of the Hill", desc: "Knock everyone off the highest tile.", tint: "#8a5cff" },
+  { title: "Hot Potato Golf", desc: "Putt the ticking ball near your friends before it pops.", tint: "#ff8a3d" },
+  { title: "Skee Blast", desc: "Lob shots into rings at different heights for points.", tint: "#ff4fa0" },
   { title: "Coin Dash", desc: "Putt through coins. Most coins in five shots wins.", tint: "#ffd23f" },
 ];
 const BLAST_SAMPLE = [
@@ -2742,7 +3409,7 @@ function showHome(on) {
 function stopEverything() {
   $("sheetHost").innerHTML = "";
   if (blast) for (const s of blast.shots) scene.remove(s.mesh);
-  blast = null; clearRobots(); rush = null; stopAvatarGames();
+  blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish();
   for (const pl of players) scene.remove(pl.mesh);
   players = []; shotLive = false; aiming = null;
 }
@@ -2759,6 +3426,9 @@ function randomArenaFor(kind, play) {
   else if (kind === "splat") { loadList(randomPlaygroundLayout()); rebuildKerbs(); par = null; }
   else if (kind === "race") { loadList(randomRaceLayout()); rebuildKerbs(); par = null; }
   else if (kind === "pitch") { loadList(randomPitchLayout()); rebuildKerbs(); par = null; }
+  else if (kind === "bowl") { loadList(randomBowlLayout()); rebuildKerbs(); par = null; }
+  else if (kind === "koth") { loadList(randomHillLayout()); kerbsDirty = true; par = null; }
+  else if (kind === "fish") { clearArena(); par = null; }
   else {
     for (let i = 0; i < 20; i++) { loadList(randomLayout().list); rebuildKerbs(); if (robotPath()) break; }
     par = null;
@@ -2788,6 +3458,7 @@ function openGame(kind) {
 function lobby(kind) {
   sheet(`<h2>${GAMES[kind].name}</h2>
     <p>${GAME_HOWTO[kind]}${kind === "golf" && par ? ` This hole is par ${par}.` : ""}</p>
+    ${kind === "fish" ? `<p style="font-weight:700;color:var(--ink)">How long?</p><div class="count" id="fishMins">${[1, 2, 3].map(m => `<button data-m="${m}" aria-pressed="${m === fishMinutes}">${m} min</button>`).join("")}</div>` : ""}
     <p style="font-weight:700;color:var(--ink)">Players</p>
     ${playersPicker()}
     <button class="btn primary" id="lobbyPlay" style="font-size:18px;padding:12px">Play</button>
@@ -2796,6 +3467,9 @@ function lobby(kind) {
       <button class="btn" id="lobbyEdit">Edit this arena</button>
     </div>`, (h, close) => {
     wirePlayersPicker(h);
+    h.querySelectorAll("#fishMins button").forEach(b => b.onclick = () => {
+      fishMinutes = +b.dataset.m; FISH_TIME = fishMinutes * 60; h.querySelectorAll("#fishMins button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    });
     h.querySelector("#lobbyPlay").onclick = () => { close(); startPlay(); };
     h.querySelector("#lobbyShuffle").onclick = () => { close(); transition(() => { randomArenaFor(kind, false); setMode("preview"); lobby(kind); }); };
     h.querySelector("#lobbyEdit").onclick = () => { close(); setMode("build"); };
@@ -2824,7 +3498,7 @@ function rollTwists(kind) {
   }
   return out;
 }
-const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball" };
+const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing" };
 function rollRandomGame() {
   transition(() => {
     stopEverything(); showHome(false);
@@ -2969,6 +3643,34 @@ function makeThumbnails() {
       const b = makeBallMesh(0.45), [x, y] = cellCenter(4, 5); b.position.set(x, TOP + 0.45, -y); scene.add(b);
       return [b, placeFig(TEAM[0].color, grid.get(key(3, 4))), placeFig(TEAM[1].color, grid.get(key(5, 6)))];
     });
+    thumbs.bowl = snapshot(randomBowlLayout(), () => {
+      const d = pinDeck(), st = findStart(), out = [];
+      if (!d || !st) return out;
+      const [cx, cy] = cellCenter(d.x, d.y), [sx, sy] = cellCenter(st.x, st.y), l = Math.hypot(cx - sx, cy - sy), fx = (cx - sx) / l, fy = (cy - sy) / l;
+      for (let r = 0; r < 4; r++) for (let i = 0; i <= r; i++) {
+        const pin = makePin(), along = r * 0.27 - 0.4, side = (i - r / 2) * 0.3;
+        pin.position.set(cx + fx * along + fy * side, d.lvl + TOP, -(cy + fy * along - fx * side)); scene.add(pin); out.push(pin);
+      }
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 14), new THREE.MeshStandardMaterial({ color: "#2f3e9e", roughness: 0.25 }));
+      ball.position.set(sx + fx * 3, (surfaceAt(sx + fx * 3, sy + fy * 3) ?? TOP) + 0.22, -(sy + fy * 3)); ball.castShadow = true; scene.add(ball); out.push(ball);
+      return out;
+    });
+    thumbs.koth = snapshot(randomHillLayout(), () => {
+      const top = Math.max(...[...grid.values()].map(p => p.lvl)), crown = [...grid.values()].filter(p => p.lvl === top && p.type !== "ramp");
+      const low = [...grid.values()].filter(p => p.lvl === 0);
+      return [placeFig(PLAYER_COLORS[1], crown[0]), placeFig(ROBOT_COLORS[0], crown[crown.length - 1], true), placeFig(ROBOT_COLORS[1], low[3], true), placeFig(ROBOT_COLORS[2], low[9], true)];
+    });
+    // Beach: no tiles, so frame the pier by hand
+    clearArena(); showBeach(true); animateBeach(1.2);
+    const fisher = makeFigure(PLAYER_COLORS[3]); fisher.position.copy(PIER_END); scene.add(fisher);
+    const bob = makeBobber(); bob.position.set(-2.5, 0.1, -22); scene.add(bob);
+    const jumper = makeFishMesh("#ffd23f"); jumper.position.set(3.5, 1.4, -18); jumper.rotation.set(0.6, 0.8, 0.4); jumper.scale.setScalar(2.2); scene.add(jumper);
+    camera.fov = 40; camera.aspect = 16 / 9; camera.updateProjectionMatrix();
+    camera.position.set(4, 5, 1); camera.lookAt(-0.5, 0.4, -16);
+    renderer.setSize(640, 360, false); renderer.render(scene, camera);
+    thumbs.fish = renderer.domElement.toDataURL("image/jpeg", 0.82);
+    for (const o of [fisher, bob, jumper]) scene.remove(o);
+    showBeach(false);
     thumbs.workshop = snapshot(SAMPLE.slice(0, 11), () => { board.visible = true; return []; });
     board.visible = false;
   } catch (e) { /* cards fall back to their colour */ }
@@ -3000,7 +3702,7 @@ function frame(now) {
   if (kerbsDirty) rebuildKerbs();
   for (const p of grid.values()) if (p.obj.userData.arm) p.obj.userData.arm.rotation.y = time * SPIN_W;
   if (Net.mirror) { // Play Together guest: no game logic here, just draw what the host sends
-    updateParticles(dt); mirrorFrame(dt);
+    updateParticles(dt); mirrorFrame(dt); animateBeach(time);
     renderer.render(scene, camera); requestAnimationFrame(frame); return;
   }
   if (hostSync && Net.connected && (hostSync.t -= dt) <= 0) { hostSync.t = 0.05; hostSnapshot(); }
@@ -3010,6 +3712,10 @@ function frame(now) {
   if (mode === "play" && game === "splat") updateSplat(dt);
   if (mode === "play" && game === "race") updateRace(dt);
   if (mode === "play" && game === "pitch") updatePitch(dt);
+  if (mode === "play" && game === "bowl") updateBowl(dt);
+  if (mode === "play" && game === "koth") updateKoth(dt);
+  if (mode === "play" && game === "fish") updateFish(dt);
+  animateBeach(time);
   if (!(mode === "play" && (game === "blast" || game === "rush"))) for (const p of grid.values()) { // boards stand up outside the shooters
     const b = p.obj.userData.board;
     if (b) b.rotation.x += ((b.userData.baseX || 0) - b.rotation.x) * Math.min(1, dt * 10);
