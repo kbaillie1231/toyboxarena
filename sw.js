@@ -1,6 +1,6 @@
 // Offline support for the Toy Box Arena website: keep a copy of every game file so it opens without internet.
 // Bump VERSION whenever the game changes (tools/publish-site.sh does this automatically).
-const VERSION = "tba-20261018181457";
+const VERSION = "tba-20261018182303";
 const FILES = ["./", "index.html", "three.min.js", "GLTFLoader.js", "OrbitControls.js", "pieces-data.js",
   "lilitaone-latin.woff2", "baloo2-latin.woff2", "app-icon.png", "app-icon-512.png", "manifest.json", "peerjs.min.js"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
