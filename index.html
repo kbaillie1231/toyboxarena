@@ -188,6 +188,7 @@ table.card td:last-child { text-align: right; font-weight: 700; }
       <label for="homeName" style="font-weight:700;color:var(--ink);margin-left:6px">Your name</label>
       <input id="homeName" maxlength="20" placeholder="Type your name" autocomplete="off"
         style="font:400 18px var(--display);border:0;border-radius:999px;padding:8px 14px;width:min(200px,50vw);color:var(--ink);background:var(--card);box-shadow:0 3px 0 rgba(0,0,0,.15);-webkit-user-select:text;user-select:text">
+      <button class="btn" id="ideasBtn">💡 Suggest an idea</button>
     </div>
     <div class="shelfLabel">Games</div>
     <div class="shelf" id="shelf"></div>
@@ -3353,6 +3354,83 @@ function fishCaught() {
   toast(`${f.name}! ${kg} kg`); renderHud();
 }
 
+
+// ===========================================================================
+// SUGGESTIONS BOX: players send ideas; an AI helper on the family Mac checks new ones every 30 minutes
+// (8am–9pm), replies, and builds the good small ones (see docs/suggestions-helper.md). Ideas travel through
+// ntfy.sh (a free relay, no accounts); replies come back in replies.json on the website.
+// ===========================================================================
+const SITE = "https://kbaillie1231.github.io/toyboxarena/";
+const IDEAS_TOPIC = "tba-ideas-58ehf91eon7b00";
+const IDEAS_KEY = "tba-ideas";
+function myIdeas() { try { return JSON.parse(localStorage.getItem(IDEAS_KEY) || "[]"); } catch (e) { return []; } }
+function saveIdeas(list) { try { localStorage.setItem(IDEAS_KEY, JSON.stringify(list.slice(-30))); } catch (e) {} }
+let ideaReplies = {};
+async function loadIdeaReplies() {
+  try { const r = await fetch(SITE + "replies.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) ideaReplies = (await r.json()).replies || {}; } catch (e) {}
+}
+function openIdeas() {
+  const draw = (msgText = "", msgColor = "var(--muted)") => {
+    const mine = myIdeas().slice().reverse();
+    const statusOf = (it) => {
+      const r = ideaReplies[it.id];
+      if (!r) return { label: "Waiting for a reply (up to 30 minutes, 8am–9pm)", color: "var(--muted)", reply: "" };
+      return { label: r.status === "added" ? "Added to the game ✅" : r.status === "later" ? "Saved for a bigger update 📦" : "Not added", color: r.status === "added" ? "var(--go)" : r.status === "later" ? "#d98a00" : "var(--warn)", reply: r.reply || "" };
+    };
+    sheet(`<h2 data-dismissable>💡 Suggest an idea</h2>
+      <p>What would make Toy Box Arena more fun? A helper reads every idea, replies, and adds the good ones to the game.</p>
+      <textarea id="ideaText" maxlength="300" placeholder="My idea is…" aria-label="Your idea" style="min-height:90px;font:16px var(--body)"></textarea>
+      <p class="hint" style="text-align:left">Please don't write your real name, address, school or anything private. Be kind!</p>
+      <button class="btn primary" id="ideaSend" style="font-size:18px;padding:12px">Send idea</button>
+      <p id="ideaMsg" aria-live="polite" style="color:${msgColor}">${msgText}</p>
+      ${mine.length ? `<p style="font-weight:700;color:var(--ink)">My ideas</p><div class="rules">${mine.map(it => { const st = statusOf(it); return `<div class="rule" style="align-items:flex-start"><div><b style="font-size:14px">${esc(it.text)}</b><span style="display:block;color:${st.color};font-weight:700">${st.label}</span>${st.reply ? `<span style="display:block">${esc(st.reply)}</span>` : ""}</div></div>`; }).join("")}</div>` : ""}`, (h, close) => {
+      h.querySelector("#ideaSend").onclick = async () => {
+        const text = h.querySelector("#ideaText").value.trim();
+        if (text.length < 4) { draw("Write a little more about your idea first.", "var(--warn)"); return; }
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        h.querySelector("#ideaSend").disabled = true;
+        try {
+          const r = await fetch("https://ntfy.sh/" + IDEAS_TOPIC, { method: "POST", body: JSON.stringify({ id, text: text.slice(0, 300), v: 1 }) });
+          if (!r.ok) throw new Error("bad response");
+          saveIdeas([...myIdeas(), { id, text: text.slice(0, 300), at: Date.now() }]);
+          draw("Sent! Check back here for a reply.", "var(--go)");
+        } catch (e) {
+          draw("Couldn't send right now. Check the internet and try again.", "var(--warn)");
+        }
+      };
+    });
+  };
+  draw();
+  loadIdeaReplies().then(() => { if (document.getElementById("ideaText") && !document.getElementById("ideaText").value) draw(); });
+}
+
+// ===========================================================================
+// AUTO-UPDATE FOR THE APP: the app ships with a built-in copy of the game (works offline). When it's online,
+// it switches to the website version so new games and fixes arrive without reinstalling. Saved stuff
+// (Workshop, your games, your name, your ideas) moves across once.
+// ===========================================================================
+const SAVE_KEYS = ["tba-workshop", "tba-custom", "tba-name", "tba-ideas"];
+function importSavesFromHash() {
+  const m = location.hash.match(/^#import=([A-Za-z0-9+/=_-]+)$/);
+  if (!m) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/")))));
+    for (const k of SAVE_KEYS) if (data[k] != null && !localStorage.getItem(k)) localStorage.setItem(k, data[k]);
+  } catch (e) {}
+  history.replaceState(null, "", location.pathname);
+}
+async function maybeSwitchToWebsite() {
+  if (location.protocol !== "file:") return; // only the app's built-in copy switches
+  try {
+    const ctrl = new AbortController(); setTimeout(() => ctrl.abort(), 2500);
+    const r = await fetch(SITE + "version.json?t=" + Date.now(), { cache: "no-store", signal: ctrl.signal });
+    if (!r.ok) return;
+    let pack = "";
+    try { const data = {}; for (const k of SAVE_KEYS) { const v = localStorage.getItem(k); if (v != null) data[k] = v; } pack = btoa(unescape(encodeURIComponent(JSON.stringify(data)))).replace(/\+/g, "-").replace(/\//g, "_"); } catch (e) {}
+    location.replace(SITE + (pack ? "#import=" + pack : ""));
+  } catch (e) { /* offline: keep playing the built-in copy */ }
+}
+
 // ---------------------------------------------------------------------------
 // Home screen ("the toy box shelf") and smooth switching between games.
 // Screens: home → (game preview + lobby card) → play → results → again / random / home.
@@ -3678,6 +3756,7 @@ function makeThumbnails() {
 }
 
 $("homeBtn").onclick = goHome;
+$("ideasBtn").onclick = openIdeas;
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -3766,6 +3845,8 @@ function frame(now) {
 if ("serviceWorker" in navigator && location.protocol === "https:" && !/claude\.ai|claudeusercontent/.test(location.hostname)) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
+importSavesFromHash();
+maybeSwitchToWebsite();
 loadTemplates().then(() => {
   makeThumbnails();
   loadList(SAMPLE); rebuildKerbs(); par = 3;
