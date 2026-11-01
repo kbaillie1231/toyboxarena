@@ -248,16 +248,16 @@ let MAX_STROKES = 10; const SPIN_W = 1.6, MAX_SHOT = 12, PIECE_BUDGET = 120;
 let FRICTION = 1, BOUNCE = 1, WIND = [0, 0], SHOT_MULT = 1, TARGET_SPEED = 1, TARGET_SIZE = 1, ROBOT_SPEED = 1, ROBOT_COUNT = 1, LIVES = 3;
 let activeTwists = [];
 const TWISTS = [
-  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "coins", "potato", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { G = 9.8 * 0.38; } },
+  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "coins", "potato", "skee", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { G = 9.8 * 0.38; } },
   { id: "ice", word: "Ice", name: "Ice rink", desc: "The ball barely slows down.", color: "#2fa8ff", games: ["golf", "coins", "potato", "bowl"], apply: () => { FRICTION = 0.3; } },
   { id: "bouncy", word: "Bouncy", name: "Super bouncy", desc: "Walls and bumpers bounce way harder.", color: "#ff4fa0", games: ["golf", "coins", "potato", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { BOUNCE = 1.35; } },
   { id: "giant", word: "Giant", name: "Giant ball", desc: "Your ball is twice as big.", color: "#ff8a3d", games: ["golf", "coins", "potato", "bowl"], apply: () => { BALL_R = 0.3; } },
   { id: "tiny", word: "Tiny", name: "Tiny ball", desc: "A pea-sized ball. The cup feels huge.", color: "#3fbf55", games: ["golf"], apply: () => { BALL_R = 0.08; } },
-  { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "coins", "blast", "rush", "splat"],
+  { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "coins", "skee", "blast", "rush", "splat"],
     apply: () => { const a = Math.random() * Math.PI * 2; WIND = [Math.cos(a) * 1.6, Math.sin(a) * 1.6]; } },
   { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf", "coins", "potato"], apply: () => { SHOT_MULT = 1.6; } },
-  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato"],
-    apply: () => { COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
+  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over.", skee: "Only 5 balls each." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato", "skee"],
+    apply: () => { SKEE_BALLS = 5; COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
   { id: "speedy", word: "Speedy", name: "Speedy targets", desc: "Targets pop up and drop twice as fast.", color: "#ffd23f", games: ["blast"], apply: () => { TARGET_SPEED = 1.9; } },
   { id: "big", word: "Big-Target", name: "Big targets", desc: "Targets are easier to hit.", color: "#5ccf4f", games: ["blast"], apply: () => { TARGET_SIZE = 1.5; } },
   { id: "rapid", word: "Rapid-Fire", name: "Rapid fire", desc: "The blaster fires three times as fast.", color: "#ff8a3d", games: ["blast", "rush", "splat"], apply: () => { FIRE_COOLDOWN = 0.07; } },
@@ -275,7 +275,7 @@ function resetRules() {
   BALL_R = 0.15; G = 9.8; FRICTION = 1; BOUNCE = 1; WIND = [0, 0]; SHOT_MULT = 1; MAX_STROKES = 10;
   BLAST_TIME = 30; FIRE_COOLDOWN = 0.22; TARGET_SPEED = 1; TARGET_SIZE = 1; ROBOT_SPEED = 1; ROBOT_COUNT = 1; LIVES = 3;
   AVATAR_SPEED = 1; FRICTION_AV = 1; BOT_COUNT = 3; SPLAT_TIME = 60; RACE_LIMIT = 90; GOALS_TO_WIN = 3; PITCH_BALL_R = 0.45; JUMP_MULT = 1;
-  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
+  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; SKEE_BALLS = 9; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
   activeTwists = [];
 }
 function applyTwists(list) { resetRules(); activeTwists = list; for (const t of list) t.apply(); }
@@ -800,6 +800,7 @@ const GAMES = {
   fish: { name: "Beach Fishing", needs: "", needLabel: "" },
   coins: { name: "Coin Dash", needs: "start", needLabel: "at least 6 tiles" },
   potato: { name: "Hot Potato Golf", needs: "start", needLabel: "at least 6 tiles" },
+  skee: { name: "Skee Blast", needs: "start", needLabel: "some tiles at least 5 m from the tee" },
 };
 // Mini-golf, Coin Dash and Hot Potato Golf all putt balls with the same physics and controls.
 const putting = (g = game) => g === "golf" || g === "coins" || g === "potato";
@@ -808,6 +809,7 @@ function validity(g = game) {
   for (const p of grid.values()) { if (p.type === "start") starts++; if (p.type === "goal") goals++; if (p.type === "target") targets++; if (p.type === "net") nets++; }
   if (g === "pitch") return { starts, goals, targets, nets, need: nets >= 2 ? 1 : 0, ok: nets >= 2, noTee: true };
   if (g === "fish") return { starts, goals, targets, nets, need: 1, ok: true, noTee: true };
+  if (g === "skee") { const st = findStart(), ok = !!st && skeeRingCells(st).length >= 3; return { starts, goals, targets, nets, need: ok ? 1 : 0, ok: ok && starts === 1 }; }
   if (g === "coins" || g === "potato") { const ok = grid.size >= 6; return { starts, goals, targets, nets, need: ok ? 1 : 0, ok: ok && starts === 1 }; }
   if (g === "koth") { const hill = grid.size >= 6 && [...grid.values()].some(p => p.lvl >= 1); return { starts, goals, targets, nets, need: hill ? 1 : 0, ok: hill, noTee: true }; }
   if (g === "bowl") { const deck = [...grid.values()].some(p => p.type === "pins"); return { starts, goals, targets, nets, need: deck ? 1 : 0, ok: starts === 1 && deck }; }
@@ -828,6 +830,7 @@ function startPlay() {
   if (game === "fish") return startFish();
   if (game === "coins") return startCoins();
   if (game === "potato") return startPotato();
+  if (game === "skee") return startSkee();
   const v = validity();
   if (!v.ok) { toast(validityMessage(v)); return; }
   const st = findStart(), [sx, sy] = cellCenter(st.x, st.y);
@@ -1052,6 +1055,121 @@ function botPutt() { // a robot ball: chases someone when it holds the potato, r
     dx = Math.cos(a); dy = Math.sin(a); power = 2.5 + Math.random() * 3;
   }
   shoot(dx, dy, power * SHOT_MULT);
+}
+
+// ---------------------------------------------------------------------------
+// SKEE BLAST: lob balls from the tee into hoops on poles. Hoops further away, higher up and smaller are worth
+// more (10 to 100). 9 balls each, pass the phone. The ball bounces off the floor and scores when it drops through a hoop.
+// ---------------------------------------------------------------------------
+let SKEE_BALLS = 9, skee = null; // { rings: [{ x, y, z, r, pts, mesh }], ball, over }
+const SKEE_TIERS = [{ pts: 10, r: 0.85, h: 0.5, color: "#2fa8ff" }, { pts: 20, r: 0.75, h: 1.0, color: "#3fbf55" }, { pts: 30, r: 0.65, h: 1.6, color: "#ffd23f" },
+  { pts: 50, r: 0.55, h: 2.2, color: "#ff8a3d" }, { pts: 100, r: 0.45, h: 2.9, color: "#ff3b3b" }];
+function skeeRingCells(st) {
+  const [sx, sy] = cellCenter(st.x, st.y);
+  return [...grid.values()].filter(p => p.type !== "start" && p.type !== "spinner" && p.type !== "wall" && Math.hypot(cellCenter(p.x, p.y)[0] - sx, cellCenter(p.x, p.y)[1] - sy) >= 5);
+}
+function makeRing(color, r, h) { // a hoop lying flat on top of a pole, with a points sign
+  const g = new THREE.Group();
+  const hoop = new THREE.Mesh(new THREE.TorusGeometry(r, 0.06, 10, 32), new THREE.MeshStandardMaterial({ color, roughness: 0.4 }));
+  hoop.rotation.x = Math.PI / 2; hoop.castShadow = true; g.add(hoop);
+  if (h > 0) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, h, 8), new THREE.MeshStandardMaterial({ color: "#f4f7fa" }));
+    pole.position.set(r + 0.06, -h / 2, 0); pole.castShadow = true; g.add(pole);
+  }
+  return g;
+}
+function ringSign(pts, color) {
+  const c = document.createElement("canvas"); c.width = 128; c.height = 64;
+  const g = c.getContext("2d"); g.fillStyle = color; g.beginPath(); g.roundRect ? g.roundRect(4, 4, 120, 56, 20) : g.rect(4, 4, 120, 56); g.fill();
+  g.fillStyle = "#fff"; g.font = "bold 40px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(pts, 64, 34);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false }));
+  sp.scale.set(0.9, 0.45, 1); return sp;
+}
+function randomSkeeLayout() { // an alley: tee at one end, a floor that widens and steps up toward the back
+  const out = [], x0 = rint(2, 4), len = rint(8, 10), y0 = Math.floor((H - len) / 2);
+  out.push(["start", x0 + 1, y0, 0, 0]);
+  for (let y = y0 + 1; y < y0 + len; y++) {
+    const wide = y - y0 > 3 ? 4 : 3, lvl = y - y0 >= len - 2 && Math.random() < 0.6 ? 1 : 0;
+    for (let x = x0; x < x0 + wide; x++) out.push([Math.random() < 0.08 && y > y0 + 2 ? "bouncer" : "floor", x, y, lvl, 0]);
+  }
+  return out;
+}
+function stopSkee() { if (skee) { for (const r of skee.rings) scene.remove(r.mesh); if (skee.ball) scene.remove(skee.ball.mesh); } skee = null; }
+function startSkee() {
+  const v = validity("skee");
+  if (!v.ok) { toast(validityMessage(v, "skee")); return; }
+  stopSkee(); clearCoins();
+  const st = findStart(), [sx, sy] = cellCenter(st.x, st.y);
+  for (const pl of players) scene.remove(pl.mesh);
+  players = [];
+  for (let i = 0; i < playerCount; i++) {
+    const ball = { x: sx, y: sy, z: st.lvl + TOP }, mesh = makeBall(i);
+    mesh.position.set(sx, ball.z + BALL_R, -sy);
+    players.push({ i, ball, mesh, score: 0, thrown: 0, hits: 0, done: false });
+  }
+  turn = 0;
+  // Hoops: one per tier, further tiers further away (shuffled a little so every alley is different)
+  const cells = skeeRingCells(st).map(p => ({ p, d: Math.hypot(cellCenter(p.x, p.y)[0] - sx, cellCenter(p.x, p.y)[1] - sy) + Math.random() * 2 })).sort((a, b) => a.d - b.d);
+  const rings = [], used = [];
+  SKEE_TIERS.forEach((t, k) => {
+    const pick = cells.filter(c => used.every(u => Math.hypot(c.p.x - u.x, c.p.y - u.y) >= 1.5));
+    if (!pick.length) return;
+    const c = pick[Math.min(pick.length - 1, Math.floor(k / SKEE_TIERS.length * pick.length))].p; used.push(c);
+    const [x, y] = cellCenter(c.x, c.y), z = (surfaceAt(x, y) ?? c.lvl + TOP) + t.h;
+    const mesh = netTrack(makeRing(t.color, t.r, t.h), "ring", t.color, t.r);
+    const sign = ringSign(t.pts, t.color); sign.position.set(0, 0.45, 0); mesh.add(sign);
+    mesh.position.set(x, z, -y); scene.add(mesh);
+    rings.push({ x, y, z, r: t.r, pts: t.pts, color: t.color, mesh });
+  });
+  skee = { rings, ball: null, over: false };
+  setMode("play");
+  // Stand behind the tee looking down the alley
+  const mx = rings.reduce((a, r) => a + r.x, 0) / rings.length, my = rings.reduce((a, r) => a + r.y, 0) / rings.length;
+  controls.target.set((sx + mx) / 2, 1, -(sy + my) / 2);
+  const back = new THREE.Vector3(sx - mx, 0, -(sy - my)).setLength(7);
+  camera.position.set(sx, 6.5, -sy).add(back);
+  toast(playerCount > 1 ? PLAYER_NAMES[0] + " throws first" : "Lob it in!");
+}
+function skeeThrow(dx, dy, power) {
+  const pl = players[turn]; if (!skee || skee.ball || pl.done) return;
+  const sp = power * 1.35, up = 0.87; // about 50 degrees up; full power reaches the back of the alley
+  const b = { x: pl.ball.x, y: pl.ball.y, z: pl.ball.z + 0.3, vx: dx * sp * 0.64, vy: dy * sp * 0.64, vz: sp * 0.77 * up + 1, t: 0, scored: false };
+  b.mesh = netTrack(new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 12), new THREE.MeshStandardMaterial({ color: PLAYER_COLORS[pl.i], roughness: 0.35 })), "ball", PLAYER_COLORS[pl.i], 0.17);
+  b.mesh.castShadow = true; scene.add(b.mesh);
+  skee.ball = b; pl.thrown++; pl.mesh.visible = false; renderHud();
+}
+function updateSkee(dt) {
+  if (!skee || !skee.ball) return;
+  const b = skee.ball, SUB = 4, h = dt / SUB;
+  for (let s = 0; s < SUB; s++) {
+    const pz = b.z;
+    b.vz -= G * h; b.vx += WIND[0] * h * 0.5; b.vy += WIND[1] * h * 0.5;
+    b.x += b.vx * h; b.y += b.vy * h; b.z += b.vz * h;
+    for (const r of skee.rings) { // through the hoop, going down
+      const d = Math.hypot(b.x - r.x, b.y - r.y);
+      if (!b.scored && pz > r.z && b.z <= r.z && d < r.r - 0.08) {
+        b.scored = true; const pl = players[turn]; pl.score += r.pts; pl.hits++;
+        burst(r.x, r.y, r.z, r.color); toast(`+${r.pts}!`); renderHud();
+      } else if (Math.abs(b.z - r.z) < 0.12 && Math.abs(d - r.r) < 0.14) { // clipped the rim: bounce off it
+        const nx = (b.x - r.x) / (d || 1), ny = (b.y - r.y) / (d || 1), sign = d < r.r ? -1 : 1, vn = (b.vx * nx + b.vy * ny) * sign;
+        if (vn < 0) { b.vx -= 1.6 * vn * nx * sign; b.vy -= 1.6 * vn * ny * sign; b.vz *= 0.7; }
+      }
+    }
+    const ground = surfaceAt(b.x, b.y);
+    if (ground != null && b.z < ground && pz >= ground - 0.3) { b.z = ground; b.vz = Math.abs(b.vz) * 0.45; b.vx *= 0.75; b.vy *= 0.75; }
+  }
+  b.t += dt;
+  b.mesh.position.set(b.x, b.z + 0.17, -b.y);
+  const ground = surfaceAt(b.x, b.y), stopped = ground != null && b.z - ground < 0.05 && Math.hypot(b.vx, b.vy) < 0.4;
+  if (b.t > 4.5 || b.z < -4 || stopped || (b.scored && b.t > 2.2)) {
+    scene.remove(b.mesh); skee.ball = null;
+    const pl = players[turn];
+    if (pl.thrown >= SKEE_BALLS) pl.done = true;
+    if (players.every(p => p.done)) { skee.over = true; renderHud(); setTimeout(() => { if (mode === "play" && game === "skee") showResults(); }, 700); return; }
+    if (pl.done) { turn = (turn + 1) % players.length; setTimeout(() => toast(PLAYER_NAMES[turn] + "'s turn"), 300); }
+    for (const p of players) p.mesh.visible = p === players[turn];
+    renderHud();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2156,7 +2274,7 @@ canvas.addEventListener("pointerdown", ev => {
   if (mode === "play" && game === "fish") { fishPointer("down", ev); return; }
   if (mode === "play" && isAvatarGame()) { avatarPointer("down", ev); return; }
   down = { x: ev.clientX, y: ev.clientY, t: performance.now(), id: ev.pointerId };
-  if (mode === "play" && (putting() || (game === "bowl" && bowl && bowl.phase === "aim")) && !shotLive && players[turn] && !players[turn].done && !players[turn].bot) {
+  if (mode === "play" && (putting() || (game === "bowl" && bowl && bowl.phase === "aim") || (game === "skee" && skee && !skee.ball && !skee.over)) && !shotLive && players[turn] && !players[turn].done && !players[turn].bot) {
     const b = players[turn].ball, g = groundHit(ev, b.z);
     if (g && Math.hypot(g[0] - b.x, g[1] - b.y) < 1.8) {
       aiming = { start: g, cur: g };
@@ -2188,7 +2306,7 @@ canvas.addEventListener("pointerup", ev => {
     const [dx, dy] = [aiming.start[0] - aiming.cur[0], aiming.start[1] - aiming.cur[1]];
     const len = Math.hypot(dx, dy), power = Math.min(MAX_SHOT * SHOT_MULT, len * 3.2 * SHOT_MULT);
     aiming = null; controls.enabled = true; aimGroup.visible = false;
-    if (power > 0.4) { if (game === "bowl") bowlRoll(dx / len, dy / len, power); else shoot(dx / len, dy / len, power); }
+    if (power > 0.4) { if (game === "bowl") bowlRoll(dx / len, dy / len, power); else if (game === "skee") skeeThrow(dx / len, dy / len, power); else shoot(dx / len, dy / len, power); }
     return;
   }
   if (!down) return;
@@ -2243,13 +2361,13 @@ function toast(msg) {
 function setMode(m) {
   mode = m;
   board.visible = m === "build"; cursor.visible = false;
-  controls.enabled = !(m === "play" && (isAvatarGame() || game === "bowl" || game === "fish")); // these games steer the camera themselves
+  controls.enabled = !(m === "play" && (isAvatarGame() || game === "bowl" || game === "fish" || game === "skee")); // these games steer the camera themselves
   showBeach(game === "fish" && m !== "build");
   kerbsDirty = true;
   const off = camera.position.clone().sub(controls.target);
   const shooter = game === "blast" || game === "rush";
   blaster.visible = m === "play" && shooter;
-  if (m === "build" || m === "preview") { stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh); }
+  if (m === "build" || m === "preview") { stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh); stopSkee(); }
   if (m === "build") { if (blast) for (const s of blast.shots) scene.remove(s.mesh); blast = null; clearRobots(); rush = null; }
   if (m === "play" && shooter) { // stand behind the blaster, looking out over the range
     // Look at the middle of the targets from behind and above the tee, far enough to see them all.
@@ -2297,6 +2415,12 @@ function renderHud() {
     top.innerHTML = chips(p => `${p.coins} 🪙`);
     const cur = players[turn], left = coinDash ? coinDash.coins.length : 0;
     bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && !cur.done ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}shot ${cur.strokes + 1} of ${COIN_SHOTS} · ${left} coins left` : ""}</div>${hint("Drag back from your ball and let go. Roll over coins to grab them!")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "skee") {
+    top.innerHTML = chips(p => p.score);
+    const cur = players[turn];
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && skee ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}ball ${Math.min(cur.thrown + 1, SKEE_BALLS)} of ${SKEE_BALLS} · ${cur.score} pts` : ""}</div>${hint("Drag back from the ball and let go to lob it. Higher rings score more!")}</div>`;
     return;
   }
   if (mode === "play" && game === "potato") {
@@ -2423,6 +2547,7 @@ const GAME_HOWTO = {
   koth: "Stay on the very top to score. Tap the right side to dash and shove the robots off.",
   fish: "Drag back to cast. When a fish bites, tap fast, then hold to reel. Most fish wins.",
   coins: "Putt over coins to grab them. 5 shots each, and a hole is worth 3 coins. Most coins wins.",
+  skee: "Drag back and let go to lob the ball into the rings. Higher, smaller rings score more. 9 balls each.",
   potato: "One ball has the ticking potato. Putt into another ball to pass it before it pops! Fewest pops wins.",
 };
 function askPlayers() {
@@ -2508,6 +2633,11 @@ function showResults() {
     head = rows.length > 1 ? (rows[0].coins === rows[1].coins ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].coins} coins!`;
     table = rows.map(p => `<tr><td>${chip(p)}</td><td>${p.coins} 🪙</td></tr>`).join("");
     again = "Same course again";
+  } else if (game === "skee") {
+    const rows = [...players].sort((a, b) => b.score - a.score);
+    head = rows.length > 1 ? (rows[0].score === rows[1].score ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].score} points!`;
+    table = rows.map(p => `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">${p.hits}/${SKEE_BALLS} in</span></td><td>${p.score} pts</td></tr>`).join("");
+    again = "Same alley again";
   } else if (game === "potato") {
     const rows = [...players].sort((a, b) => a.pops - b.pops);
     const best = rows.filter(p => p.pops === rows[0].pops);
@@ -2909,6 +3039,7 @@ function mirrorMake(kind, color, r) {
   if (kind === "rod") return makeRod();
   if (kind === "coin") return makeCoin();
   if (kind === "potato") return makePotato();
+  if (kind === "ring") return makeRing(color, r, 0);
   return new THREE.Group();
 }
 function onSnap(s) {
@@ -3665,13 +3796,15 @@ const GAME_CARDS = [
   { id: "fish", title: "Beach Fishing", desc: "Cast off the pier, wait for a bite, and reel in the biggest fish. Most fish wins.", tag: "Chill · New", tint: "#2aa3d6" },
   { id: "coins", title: "Coin Dash", desc: "Putt through a trail of coins. Most coins in five shots wins.", tag: "Golf · New", tint: "#ffd23f" },
   { id: "potato", title: "Hot Potato Golf", desc: "Putt the ticking potato into a friend's ball before it pops. Play solo vs bots.", tag: "Party · New", tint: "#ff8a3d" },
+  { id: "skee", title: "Skee Blast", desc: "Lob balls into rings at different heights. Higher and smaller rings score more.", tag: "Arcade · New", tint: "#ff4fa0" },
   { id: "together", title: "Play Together", desc: "Play any game with a friend on their own screen: in the same room, or far away online with a code.", tag: "Online · New", tint: "#2fa8ff" },
   { id: "random", title: "Random Game", desc: "A surprise game, a surprise arena and surprise rules. Every time.", tag: "Surprise", tint: "#8a5cff" },
   { id: "maker", title: "Game Maker", desc: "Pick a game, mix in rule twists, name it and share it.", tag: "Make · New", tint: "#1d2b3a" },
   { id: "workshop", title: "Workshop", desc: "Build your own arena from toy pieces, then play any game in it.", tag: "Build", tint: "#ff8a3d" },
 ];
 const SOON_CARDS = [
-  { title: "Skee Blast", desc: "Lob shots into rings at different heights for points.", tint: "#ff4fa0" },
+  { title: "Bumper Cars", desc: "Drive a little car and bump everyone off the arena.", tint: "#2fa8ff" },
+  { title: "Treasure Hunt", desc: "Dig around the beach for buried treasure before time runs out.", tint: "#e8c07a" },
 ];
 const BLAST_SAMPLE = [
   ["start", 4, 0, 0, 0], ["target", 2, 4, 0, 2], ["target", 5, 5, 1, 2], ["target", 7, 3, 0, 2], ["target", 3, 7, 2, 2],
@@ -3704,7 +3837,7 @@ function showHome(on) {
 function stopEverything() {
   $("sheetHost").innerHTML = "";
   if (blast) for (const s of blast.shots) scene.remove(s.mesh);
-  blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh);
+  blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh); stopSkee();
   for (const pl of players) scene.remove(pl.mesh);
   players = []; shotLive = false; aiming = null;
 }
@@ -3724,6 +3857,7 @@ function randomArenaFor(kind, play) {
   else if (kind === "bowl") { loadList(randomBowlLayout()); rebuildKerbs(); par = null; }
   else if (kind === "koth") { loadList(randomHillLayout()); kerbsDirty = true; par = null; }
   else if (kind === "fish") { clearArena(); par = null; }
+  else if (kind === "skee") { loadList(randomSkeeLayout()); rebuildKerbs(); par = null; }
   else if (kind === "coins") { loadList(randomLayout().list); rebuildKerbs(); par = null; }
   else if (kind === "potato") { loadList(randomPlaygroundLayout().filter(t => t[0] !== "spinner")); rebuildKerbs(); par = null; }
   else {
@@ -3795,7 +3929,7 @@ function rollTwists(kind) {
   }
   return out;
 }
-const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing", coins: "Coin Dash", potato: "Potato Golf" };
+const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing", coins: "Coin Dash", potato: "Potato Golf", skee: "Skee Blast" };
 function rollRandomGame() {
   transition(() => {
     stopEverything(); showHome(false);
@@ -3927,6 +4061,15 @@ function makeThumbnails() {
       }
       return out;
     });
+    thumbs.skee = snapshot(randomSkeeLayout(), () => {
+      const st = findStart(), cells = skeeRingCells(st).sort((a, b) => a.y - b.y), out = [];
+      SKEE_TIERS.slice(0, 4).forEach((t, k) => {
+        const c = cells[Math.floor((k + 0.5) / 4 * cells.length)]; if (!c) return;
+        const [x, y] = cellCenter(c.x, c.y), m = makeRing(t.color, t.r, t.h); m.position.set(x + (k % 2 ? 0.8 : -0.8), c.lvl + TOP + t.h, -y);
+        const sign = ringSign(t.pts, t.color); sign.position.set(0, 0.45, 0); m.add(sign); scene.add(m); out.push(m);
+      });
+      return out;
+    });
     thumbs.blast = snapshot(BLAST_SAMPLE, () => {
       const [x, y] = cellCenter(4, 0); blaster.position.set(x, TOP, -y); blaster.visible = true; blasterMat.color.set("#ffd23f");
       barrelPivot.rotation.y = 0; return [];
@@ -4012,6 +4155,17 @@ function resize() {
 addEventListener("resize", resize);
 
 let last = performance.now();
+function drawAim() { // the arrow that grows from the ball while you drag back
+  const b = players[turn].ball, dx = aiming.start[0] - aiming.cur[0], dy = aiming.start[1] - aiming.cur[1];
+  const len = Math.hypot(dx, dy), power = Math.min(MAX_SHOT * SHOT_MULT, len * 3.2 * SHOT_MULT), L = 0.4 + power * 0.28;
+  aimGroup.visible = power > 0.4;
+  if (len > 0) {
+    aimGroup.position.set(b.x, b.z + 0.05, -b.y);
+    aimGroup.rotation.y = Math.atan2(-dx, dy); // local -Z onto world (dx, -dy)
+    shaft.scale.z = L; shaft.position.z = -L / 2 - BALL_R; head.position.z = -L - BALL_R - 0.2;
+    aimMat.color.setHSL(0.33 - 0.33 * (power / (MAX_SHOT * SHOT_MULT)), 0.9, 0.55);
+  }
+}
 function frame(now) {
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; // never negative, never a huge jump
   time += dt;
@@ -4031,6 +4185,7 @@ function frame(now) {
   if (mode === "play" && game === "bowl") updateBowl(dt);
   if (mode === "play" && game === "koth") updateKoth(dt);
   if (mode === "play" && game === "fish") updateFish(dt);
+  if (mode === "play" && game === "skee") { updateSkee(dt); if (aiming) drawAim(); }
   animateBeach(time);
   if (!(mode === "play" && (game === "blast" || game === "rush"))) for (const p of grid.values()) { // boards stand up outside the shooters
     const b = p.obj.userData.board;
@@ -4061,17 +4216,7 @@ function frame(now) {
       controls.target.add(delta); camera.position.add(delta);
     }
 
-    if (aiming) {
-      const b = players[turn].ball, dx = aiming.start[0] - aiming.cur[0], dy = aiming.start[1] - aiming.cur[1];
-      const len = Math.hypot(dx, dy), power = Math.min(MAX_SHOT * SHOT_MULT, len * 3.2 * SHOT_MULT), L = 0.4 + power * 0.28;
-      aimGroup.visible = power > 0.4;
-      if (len > 0) {
-        aimGroup.position.set(b.x, b.z + 0.05, -b.y);
-        aimGroup.rotation.y = Math.atan2(-dx, dy); // local -Z onto world (dx, -dy)
-        shaft.scale.z = L; shaft.position.z = -L / 2 - BALL_R; head.position.z = -L - BALL_R - 0.2;
-        aimMat.color.setHSL(0.33 - 0.33 * (power / (MAX_SHOT * SHOT_MULT)), 0.9, 0.55);
-      }
-    }
+    if (aiming) drawAim();
   }
   controls.update();
   renderer.render(scene, camera);
