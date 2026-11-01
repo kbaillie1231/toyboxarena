@@ -189,6 +189,7 @@ table.card td:last-child { text-align: right; font-weight: 700; }
       <input id="homeName" maxlength="20" placeholder="Type your name" autocomplete="off"
         style="font:400 18px var(--display);border:0;border-radius:999px;padding:8px 14px;width:min(200px,50vw);color:var(--ink);background:var(--card);box-shadow:0 3px 0 rgba(0,0,0,.15);-webkit-user-select:text;user-select:text">
       <button class="btn" id="ideasBtn">💡 Suggest an idea</button>
+      <button class="btn" id="rainbowBtn" aria-pressed="false">🌈 Rainbow ball</button>
     </div>
     <div class="shelfLabel">Games</div>
     <div class="shelf" id="shelf"></div>
@@ -576,9 +577,16 @@ function collide(b, c) {
 // ---------------------------------------------------------------------------
 // Balls / physics step
 // ---------------------------------------------------------------------------
+// Rainbow ball (an idea from the suggestions box): player 1's ball slowly cycles through every colour.
+const rainbowOn = () => { try { return localStorage.getItem("tba-ball") === "rainbow"; } catch (e) { return false; } };
+const RAINBOW_CSS = "conic-gradient(#ff3b3b,#ffd23f,#3fbf55,#2fa8ff,#8a5cff,#ff4fa0,#ff3b3b)";
+const chipBg = (i) => i === 0 && rainbowOn() ? RAINBOW_CSS : PLAYER_COLORS[i];
+const rainbowMats = new Set();
+function renderRainbowBtn() { const b = $("rainbowBtn"); if (b) { b.setAttribute("aria-pressed", rainbowOn()); b.textContent = rainbowOn() ? "🌈 Rainbow ball: on" : "🌈 Rainbow ball"; } }
 function makeBall(i) {
   const m = new THREE.Mesh(new THREE.SphereGeometry(BALL_R, 24, 16),
     new THREE.MeshStandardMaterial({ color: PLAYER_COLORS[i], roughness: 0.35 }));
+  if (i === 0 && rainbowOn()) rainbowMats.add(m.material);
   m.castShadow = true;
   scene.add(m);
   return netTrack(m, "ball", PLAYER_COLORS[i], BALL_R); // shown on the other iPad in Play Together
@@ -1136,6 +1144,7 @@ function skeeThrow(dx, dy, power) {
   const b = { x: pl.ball.x, y: pl.ball.y, z: pl.ball.z + 0.3, vx: dx * sp * 0.64, vy: dy * sp * 0.64, vz: sp * 0.77 * up + 1, t: 0, scored: false };
   b.mesh = netTrack(new THREE.Mesh(new THREE.SphereGeometry(0.17, 18, 12), new THREE.MeshStandardMaterial({ color: PLAYER_COLORS[pl.i], roughness: 0.35 })), "ball", PLAYER_COLORS[pl.i], 0.17);
   b.mesh.castShadow = true; scene.add(b.mesh);
+  if (pl.i === 0 && rainbowOn()) rainbowMats.add(b.mesh.material);
   skee.ball = b; pl.thrown++; pl.mesh.visible = false; renderHud();
 }
 function updateSkee(dt) {
@@ -2403,7 +2412,7 @@ function renderHud() {
     : `${GAMES[game].name}${activeTwists.length ? ` <small>${activeTwists.map(t => t.name).join(" · ")}</small>` : ""}`;
   if (mode === "preview") { top.innerHTML = ""; bottom.innerHTML = ""; return; }
   const chips = (val) => `<div class="scores">${players.map((p, k) =>
-    `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${val(p)}</div>`).join("")}</div>`;
+    `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${chipBg(p.i)};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${val(p)}</div>`).join("")}</div>`;
   const hint = (t) => `<div class="hint" style="color:#fff;text-shadow:0 1px 2px #0005">${t}</div>`;
   if (mode === "play" && game === "bowl") {
     top.innerHTML = chips(p => p.score);
@@ -2476,7 +2485,7 @@ function renderHud() {
   }
   if (mode === "play" && game === "rush") {
     top.innerHTML = `<div class="scores">${players.map((p, k) =>
-      `<div class="chip ${k === turn ? "turn" : ""}"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.score}</div>`).join("")}</div>`;
+      `<div class="chip ${k === turn ? "turn" : ""}"><b style="background:${chipBg(p.i)};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.score}</div>`).join("")}</div>`;
     const cur = players[turn], lives = rush ? Math.max(0, rush.lives) : 0;
     bottom.innerHTML = `<div class="bar" style="flex-direction:column">
       <div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${rush ? `Wave ${rush.wave}/${RUSH_WAVES} · <span style="color:var(--warn)" aria-label="${lives} lives">${"♥".repeat(lives)}</span>${players.length > 1 && cur ? ` · ${PLAYER_NAMES[cur.i]} defends` : ""}` : ""}</div>
@@ -2510,14 +2519,14 @@ function renderHud() {
     $("moreBtn").onclick = arenaSheet;
   } else if (game === "blast") {
     top.innerHTML = `<div class="scores">${players.map((p, k) =>
-      `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.score}</div>`).join("")}</div>`;
+      `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${chipBg(p.i)};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.score}</div>`).join("")}</div>`;
     const cur = players[turn], secs = blast ? Math.max(0, Math.ceil(blast.timeLeft)) : 0;
     bottom.innerHTML = `<div class="bar" style="flex-direction:column">
       <div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}0:${String(secs).padStart(2, "0")} · ${cur.score} pts` : ""}</div>
       <div class="hint" style="color:#fff;text-shadow:0 1px 2px #0005">Tap a target to blast it · drag to look around</div></div>`;
   } else {
     top.innerHTML = `<div class="scores">${players.map((p, k) =>
-      `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.strokes}${p.done && !p.picked ? " ✓" : ""}</div>`).join("")}</div>`;
+      `<div class="chip ${k === turn && !p.done ? "turn" : ""} ${p.done ? "done" : ""}"><b style="background:${chipBg(p.i)};box-shadow:inset 0 0 0 2px #1d2b3a22"></b>${p.strokes}${p.done && !p.picked ? " ✓" : ""}</div>`).join("")}</div>`;
     const cur = players[turn];
     bottom.innerHTML = `<div class="bar" style="flex-direction:column">
       <div class="panel" style="font-weight:700">${cur && !cur.done ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}stroke ${cur.strokes + 1}${par ? ` · par ${par}` : ""}` : ""}</div>
@@ -2621,7 +2630,7 @@ function arenaSheet() {
 }
 
 function showResults() {
-  const chip = (p) => `<span class="chip" style="box-shadow:none;padding:0;display:inline-flex"><b style="background:${PLAYER_COLORS[p.i]};box-shadow:inset 0 0 0 2px #1d2b3a33"></b>${PLAYER_NAMES[p.i]}</span>`;
+  const chip = (p) => `<span class="chip" style="box-shadow:none;padding:0;display:inline-flex"><b style="background:${chipBg(p.i)};box-shadow:inset 0 0 0 2px #1d2b3a33"></b>${PLAYER_NAMES[p.i]}</span>`;
   let head, table, again = "Same arena again";
   if (game === "bowl") {
     const rows = [...players].sort((a, b) => b.score - a.score);
@@ -3757,7 +3766,7 @@ function openIdeas() {
 // it switches to the website version so new games and fixes arrive without reinstalling. Saved stuff
 // (Workshop, your games, your name, your ideas) moves across once.
 // ===========================================================================
-const SAVE_KEYS = ["tba-workshop", "tba-custom", "tba-name", "tba-ideas"];
+const SAVE_KEYS = ["tba-workshop", "tba-custom", "tba-name", "tba-ideas", "tba-ball"];
 function importSavesFromHash() {
   const m = location.hash.match(/^#import=([A-Za-z0-9+/=_-]+)$/);
   if (!m) return;
@@ -3839,7 +3848,7 @@ function stopEverything() {
   if (blast) for (const s of blast.shots) scene.remove(s.mesh);
   blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh); stopSkee();
   for (const pl of players) scene.remove(pl.mesh);
-  players = []; shotLive = false; aiming = null;
+  players = []; shotLive = false; aiming = null; rainbowMats.clear();
 }
 
 function goHome() {
@@ -4137,6 +4146,8 @@ function makeThumbnails() {
 
 $("homeBtn").onclick = goHome;
 $("ideasBtn").onclick = openIdeas;
+$("rainbowBtn").onclick = () => { try { localStorage.setItem("tba-ball", rainbowOn() ? "" : "rainbow"); } catch (e) {} renderRainbowBtn(); };
+renderRainbowBtn();
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -4170,6 +4181,7 @@ function frame(now) {
   const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now; // never negative, never a huge jump
   time += dt;
   if (kerbsDirty) rebuildKerbs();
+  for (const mt of rainbowMats) mt.color.setHSL((time * 0.25) % 1, 0.85, 0.6);
   for (const p of grid.values()) if (p.obj.userData.arm) p.obj.userData.arm.rotation.y = time * SPIN_W;
   if (Net.mirror) { // Play Together guest: no game logic here, just draw what the host sends
     updateParticles(dt); mirrorFrame(dt); animateBeach(time);
