@@ -1,0 +1,27 @@
+# Free check for new ideas from the in-game 💡 box. When one arrives it commits .helper/inbox.json,
+# and that push wakes the Claude suggestions helper. No ideas = no helper run = nothing used up.
+name: Ideas inbox
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: ideas-inbox
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Look for new ideas
+        run: python3 .helper/inbox.py
+      - name: Wake the helper if there are new ideas
+        run: |
+          if [ -n "$(git status --porcelain .helper/inbox.json)" ]; then
+            git config user.name "Toy Box Arena inbox"
+            git config user.email "274639367+kbaillie1231@users.noreply.github.com"
+            git add .helper/inbox.json
+            git commit -m "Ideas waiting for the helper"
+            git push || (git pull --rebase && git push)
+          fi
