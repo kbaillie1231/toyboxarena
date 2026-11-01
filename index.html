@@ -248,16 +248,16 @@ let MAX_STROKES = 10; const SPIN_W = 1.6, MAX_SHOT = 12, PIECE_BUDGET = 120;
 let FRICTION = 1, BOUNCE = 1, WIND = [0, 0], SHOT_MULT = 1, TARGET_SPEED = 1, TARGET_SIZE = 1, ROBOT_SPEED = 1, ROBOT_COUNT = 1, LIVES = 3;
 let activeTwists = [];
 const TWISTS = [
-  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { G = 9.8 * 0.38; } },
-  { id: "ice", word: "Ice", name: "Ice rink", desc: "The ball barely slows down.", color: "#2fa8ff", games: ["golf", "bowl"], apply: () => { FRICTION = 0.3; } },
-  { id: "bouncy", word: "Bouncy", name: "Super bouncy", desc: "Walls and bumpers bounce way harder.", color: "#ff4fa0", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { BOUNCE = 1.35; } },
-  { id: "giant", word: "Giant", name: "Giant ball", desc: "Your ball is twice as big.", color: "#ff8a3d", games: ["golf", "bowl"], apply: () => { BALL_R = 0.3; } },
+  { id: "moon", word: "Moon", name: "Moon gravity", desc: "Everything floats and flies further.", color: "#8a5cff", games: ["golf", "coins", "potato", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { G = 9.8 * 0.38; } },
+  { id: "ice", word: "Ice", name: "Ice rink", desc: "The ball barely slows down.", color: "#2fa8ff", games: ["golf", "coins", "potato", "bowl"], apply: () => { FRICTION = 0.3; } },
+  { id: "bouncy", word: "Bouncy", name: "Super bouncy", desc: "Walls and bumpers bounce way harder.", color: "#ff4fa0", games: ["golf", "coins", "potato", "blast", "rush", "splat", "race", "pitch", "bowl", "koth"], apply: () => { BOUNCE = 1.35; } },
+  { id: "giant", word: "Giant", name: "Giant ball", desc: "Your ball is twice as big.", color: "#ff8a3d", games: ["golf", "coins", "potato", "bowl"], apply: () => { BALL_R = 0.3; } },
   { id: "tiny", word: "Tiny", name: "Tiny ball", desc: "A pea-sized ball. The cup feels huge.", color: "#3fbf55", games: ["golf"], apply: () => { BALL_R = 0.08; } },
-  { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "blast", "rush", "splat"],
+  { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "coins", "blast", "rush", "splat"],
     apply: () => { const a = Math.random() * Math.PI * 2; WIND = [Math.cos(a) * 1.6, Math.sin(a) * 1.6]; } },
-  { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf"], apply: () => { SHOT_MULT = 1.6; } },
-  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish"],
-    apply: () => { MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
+  { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf", "coins", "potato"], apply: () => { SHOT_MULT = 1.6; } },
+  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato"],
+    apply: () => { COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
   { id: "speedy", word: "Speedy", name: "Speedy targets", desc: "Targets pop up and drop twice as fast.", color: "#ffd23f", games: ["blast"], apply: () => { TARGET_SPEED = 1.9; } },
   { id: "big", word: "Big-Target", name: "Big targets", desc: "Targets are easier to hit.", color: "#5ccf4f", games: ["blast"], apply: () => { TARGET_SIZE = 1.5; } },
   { id: "rapid", word: "Rapid-Fire", name: "Rapid fire", desc: "The blaster fires three times as fast.", color: "#ff8a3d", games: ["blast", "rush", "splat"], apply: () => { FIRE_COOLDOWN = 0.07; } },
@@ -275,7 +275,7 @@ function resetRules() {
   BALL_R = 0.15; G = 9.8; FRICTION = 1; BOUNCE = 1; WIND = [0, 0]; SHOT_MULT = 1; MAX_STROKES = 10;
   BLAST_TIME = 30; FIRE_COOLDOWN = 0.22; TARGET_SPEED = 1; TARGET_SIZE = 1; ROBOT_SPEED = 1; ROBOT_COUNT = 1; LIVES = 3;
   AVATAR_SPEED = 1; FRICTION_AV = 1; BOT_COUNT = 3; SPLAT_TIME = 60; RACE_LIMIT = 90; GOALS_TO_WIN = 3; PITCH_BALL_R = 0.45; JUMP_MULT = 1;
-  BOWL_FRAMES = 5; KOTH_TIME = 45; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
+  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
   activeTwists = [];
 }
 function applyTwists(list) { resetRules(); activeTwists = list; for (const t of list) t.apply(); }
@@ -798,12 +798,17 @@ const GAMES = {
   bowl: { name: "Bumper Bowling", needs: "pins", needLabel: "a pin deck" },
   koth: { name: "King of the Hill", needs: "hill", needLabel: "a hill (some tiles at height 1 or 2)" },
   fish: { name: "Beach Fishing", needs: "", needLabel: "" },
+  coins: { name: "Coin Dash", needs: "start", needLabel: "at least 6 tiles" },
+  potato: { name: "Hot Potato Golf", needs: "start", needLabel: "at least 6 tiles" },
 };
+// Mini-golf, Coin Dash and Hot Potato Golf all putt balls with the same physics and controls.
+const putting = (g = game) => g === "golf" || g === "coins" || g === "potato";
 function validity(g = game) {
   let starts = 0, goals = 0, targets = 0, nets = 0;
   for (const p of grid.values()) { if (p.type === "start") starts++; if (p.type === "goal") goals++; if (p.type === "target") targets++; if (p.type === "net") nets++; }
   if (g === "pitch") return { starts, goals, targets, nets, need: nets >= 2 ? 1 : 0, ok: nets >= 2, noTee: true };
   if (g === "fish") return { starts, goals, targets, nets, need: 1, ok: true, noTee: true };
+  if (g === "coins" || g === "potato") { const ok = grid.size >= 6; return { starts, goals, targets, nets, need: ok ? 1 : 0, ok: ok && starts === 1 }; }
   if (g === "koth") { const hill = grid.size >= 6 && [...grid.values()].some(p => p.lvl >= 1); return { starts, goals, targets, nets, need: hill ? 1 : 0, ok: hill, noTee: true }; }
   if (g === "bowl") { const deck = [...grid.values()].some(p => p.type === "pins"); return { starts, goals, targets, nets, need: deck ? 1 : 0, ok: starts === 1 && deck }; }
   const need = g === "blast" ? targets : g === "rush" ? (goals && starts === 1 && robotPath() ? 1 : 0)
@@ -821,6 +826,8 @@ function startPlay() {
   if (game === "bowl") return startBowl();
   if (game === "koth") return startKoth();
   if (game === "fish") return startFish();
+  if (game === "coins") return startCoins();
+  if (game === "potato") return startPotato();
   const v = validity();
   if (!v.ok) { toast(validityMessage(v)); return; }
   const st = findStart(), [sx, sy] = cellCenter(st.x, st.y);
@@ -847,6 +854,8 @@ function shoot(dx, dy, power) {
 
 function afterShot() {
   shotLive = false;
+  if (game === "coins") return afterCoins();
+  if (game === "potato") return afterPotato();
   for (const pl of players) {
     const b = pl.ball;
     if (b.out) {
@@ -864,6 +873,185 @@ function afterShot() {
   }
   if (players.length > 1) setTimeout(() => toast(PLAYER_NAMES[turn] + "'s turn"), 700);
   renderHud();
+}
+
+// ---------------------------------------------------------------------------
+// COIN DASH: mini-golf where coins are scattered along the course. Roll over a coin to grab it
+// (whoever gets there first keeps it). 5 shots each; sinking the hole is worth 3 coins and sends you back to the tee.
+// ---------------------------------------------------------------------------
+let COIN_SHOTS = 5, coinDash = null; // { coins: [{ x, y, z, mesh }] }
+const coinGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.06, 24), coinMat = new THREE.MeshStandardMaterial({ color: "#ffd23f", metalness: 0.6, roughness: 0.3, emissive: "#6b4e00", emissiveIntensity: 0.25 });
+function makeCoin() { const m = new THREE.Mesh(coinGeo, coinMat); m.rotation.z = Math.PI / 2; m.castShadow = true; const g = new THREE.Group(); g.add(m); return g; }
+function clearCoins() { if (coinDash) for (const c of coinDash.coins) scene.remove(c.mesh); coinDash = null; }
+function putters(spots) { // one ball per player, at the given plane spots [x, y, z]
+  for (const pl of players) scene.remove(pl.mesh);
+  players = spots.map(([x, y, z], i) => {
+    const b = { x, y, z, vx: 0, vy: 0, vz: 0, grounded: true, sunk: false, out: false };
+    return { i, ball: b, strokes: 0, last: [x, y, z], home: [x, y, z], mesh: makeBall(i), done: false, coins: 0, pops: 0 };
+  });
+  turn = 0; shotLive = false;
+}
+function teeSpots(n) {
+  const st = findStart(), [sx, sy] = cellCenter(st.x, st.y);
+  return Array.from({ length: n }, (_, i) => [sx + (n > 1 ? (i - (n - 1) / 2) * 0.4 : 0), sy, st.lvl + TOP]);
+}
+function startCoins() {
+  const v = validity("coins");
+  if (!v.ok) { toast(validityMessage(v, "coins")); return; }
+  clearCoins(); potato = null;
+  putters(teeSpots(playerCount));
+  // Coins go on plain tiles, a few per tile, so there's a trail to follow
+  const spots = [...grid.values()].filter(p => p.type === "floor" || p.type === "ramp" || p.type === "booster");
+  const coins = [];
+  for (const p of spots.sort(() => Math.random() - 0.5).slice(0, 9)) {
+    for (let k = 0; k < rint(1, 2); k++) {
+      const [cx, cy] = cellCenter(p.x, p.y), x = cx + (Math.random() - 0.5) * 1.1, y = cy + (Math.random() - 0.5) * 1.1;
+      const z = surfaceAt(x, y); if (z == null) continue;
+      const mesh = netTrack(makeCoin(), "coin", "#ffd23f");
+      mesh.position.set(x, z + 0.3, -y); mesh.rotation.y = Math.random() * 6; scene.add(mesh);
+      coins.push({ x, y, z, mesh });
+    }
+  }
+  coinDash = { coins };
+  setMode("play");
+  toast(playerCount > 1 ? PLAYER_NAMES[0] + " goes first" : "Grab the coins!");
+}
+function updateCoins(dt) {
+  if (!coinDash) return;
+  for (const c of coinDash.coins) { c.mesh.rotation.y += dt * 3; c.mesh.position.y = c.z + 0.3 + Math.sin(time * 3 + c.x) * 0.05; }
+  for (const pl of players) {
+    const b = pl.ball;
+    if (b.sunk || b.out) continue;
+    coinDash.coins = coinDash.coins.filter(c => {
+      if (Math.hypot(c.x - b.x, c.y - b.y) > 0.38 || Math.abs(c.z - b.z) > 0.7) return true;
+      pl.coins++; scene.remove(c.mesh); burst(c.x, c.y, c.z + 0.3, "#ffd23f"); renderHud();
+      return false;
+    });
+  }
+}
+function returnIfOut(pl) {
+  const b = pl.ball;
+  if (!b.out) return;
+  b.out = false; [b.x, b.y, b.z] = pl.last; b.vx = b.vy = b.vz = 0; b.grounded = true; toast("Out of bounds");
+}
+function backToStart(pl) {
+  const b = pl.ball;
+  b.sunk = false; delete b.sinkT; [b.x, b.y, b.z] = pl.home; b.vx = b.vy = b.vz = 0; b.grounded = true;
+}
+function afterCoins() {
+  for (const pl of players) {
+    returnIfOut(pl);
+    if (pl.ball.sunk) { pl.coins += 3; toast(`In the hole! +3 coins`); backToStart(pl); }
+    if (!pl.done && pl.strokes >= COIN_SHOTS) pl.done = true;
+  }
+  if (players.every(p => p.done) || (coinDash && !coinDash.coins.length)) { setTimeout(showResults, 900); renderHud(); return; }
+  for (let k = 1; k <= players.length; k++) { const n = (turn + k) % players.length; if (!players[n].done) { turn = n; break; } }
+  if (players.length > 1) setTimeout(() => toast(PLAYER_NAMES[turn] + "'s turn"), 700);
+  renderHud();
+}
+
+// ---------------------------------------------------------------------------
+// HOT POTATO GOLF: one ball carries a ticking potato. Bump another ball (or get bumped) and it's theirs.
+// When the fuse runs out the holder gets popped. Fewest pops after 3 pops wins. Solo players get 2 robot balls.
+// ---------------------------------------------------------------------------
+let POTATO_POPS = 3, potato = null; // { holder, fuse, pass, popsSoFar, over, shown }
+const potatoName = (p) => PLAYER_NAMES[p.i] + (p.bot ? " bot" : "");
+const potName = potatoName;
+function newFuse() { return 14 + Math.random() * 12; }
+function makePotato() { // a lumpy brown potato with a lit fuse on top
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), new THREE.MeshStandardMaterial({ color: "#b07a3a", roughness: 0.9 }));
+  body.scale.set(1.25, 0.9, 0.95); body.castShadow = true;
+  const fuse = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.16, 6), new THREE.MeshStandardMaterial({ color: "#3a2a1a" }));
+  fuse.position.y = 0.24;
+  const spark = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), new THREE.MeshBasicMaterial({ color: "#ffd23f" }));
+  spark.position.y = 0.33; spark.name = "spark";
+  g.add(body, fuse, spark); return g;
+}
+let potatoMesh = null;
+function startPotato() {
+  const v = validity("potato");
+  if (!v.ok) { toast(validityMessage(v, "potato")); return; }
+  clearCoins();
+  // Everyone starts on a different tile, spread out
+  const n = Math.max(playerCount, 3), cells = walkableCells().filter(p => p.type !== "wall").sort(() => Math.random() - 0.5), spots = [];
+  for (const p of cells) {
+    const [x, y] = cellCenter(p.x, p.y), z = surfaceAt(x, y); if (z == null) continue;
+    if (spots.every(s => Math.hypot(s[0] - x, s[1] - y) > 3.5)) spots.push([x, y, z]);
+    if (spots.length === n) break;
+  }
+  while (spots.length < n) spots.push(teeSpots(1)[0]);
+  putters(spots);
+  players.forEach((p, k) => { p.bot = k >= playerCount; });
+  potato = { holder: rint(0, players.length - 1), fuse: newFuse(), pass: 0, popsSoFar: 0, over: false, shown: -1 };
+  if (!potatoMesh) potatoMesh = netTrack(makePotato(), "potato", "#b07a3a");
+  scene.add(potatoMesh);
+  setMode("play");
+  toast(`${potatoName(players[potato.holder])} has the potato!`);
+  if (players[turn].bot) setTimeout(botPutt, 1200);
+}
+function potatoTouch() {
+  if (!potato || potato.over || potato.pass > 0) return;
+  const hb = players[potato.holder].ball;
+  for (const pl of players) {
+    if (pl.i === potato.holder || pl.ball.sunk) continue;
+    if (Math.hypot(pl.ball.x - hb.x, pl.ball.y - hb.y) < BALL_R * 2 + 0.03 && Math.abs(pl.ball.z - hb.z) < 0.5) {
+      potato.holder = pl.i; potato.pass = 0.8; // short grace so it can't bounce straight back
+      toast(`${potatoName(pl)} has the potato!`); renderHud(); return;
+    }
+  }
+}
+function updatePotato(dt) {
+  if (!potato) return;
+  for (const pl of players) { // the holder's ball glows red, faster as the fuse runs down
+    const m = pl.mesh.material, hot = pl.i === potato.holder && !potato.over;
+    if (!m.emissive) continue;
+    if (hot) { const f = Math.max(0.15, potato.fuse / 26); m.emissive.set("#ff3b1f"); m.emissiveIntensity = 0.35 + 0.35 * Math.sin(time * (4 + 14 / f)); }
+    else m.emissiveIntensity = 0;
+  }
+  if (potatoMesh) { // the potato rides above whoever has it
+    const hb = players[potato.holder].ball, sp = potatoMesh.getObjectByName("spark");
+    potatoMesh.visible = !potato.over;
+    potatoMesh.position.set(hb.x, hb.z + BALL_R * 2 + 0.35 + Math.abs(Math.sin(time * 5)) * 0.12, -hb.y);
+    potatoMesh.rotation.y = time * 2;
+    if (sp) sp.scale.setScalar(0.7 + Math.random() * 0.8);
+  }
+  if (potato.over) return;
+  potato.pass = Math.max(0, potato.pass - dt);
+  potato.fuse -= dt;
+  if (Math.ceil(potato.fuse) !== potato.shown) { potato.shown = Math.ceil(potato.fuse); renderHud(); }
+  if (potato.fuse > 0) return;
+  const pl = players[potato.holder], b = pl.ball;
+  pl.pops++; potato.popsSoFar++;
+  burst(b.x, b.y, b.z + 0.3, "#ff8a3d"); burst(b.x, b.y, b.z + 0.3, "#ffd23f");
+  toast(`POP! ${potatoName(pl)} got popped`);
+  if (potato.popsSoFar >= POTATO_POPS) { potato.over = true; renderHud(); setTimeout(() => { if (mode === "play" && game === "potato") showResults(); }, 1300); return; }
+  const others = players.filter(p => p.i !== pl.i);
+  potato.holder = others[rint(0, others.length - 1)].i; potato.fuse = newFuse(); potato.pass = 0.8;
+  setTimeout(() => { if (potato && !potato.over) toast(`${potatoName(players[potato.holder])} has the potato!`); }, 1100);
+  renderHud();
+}
+function afterPotato() {
+  for (const pl of players) { returnIfOut(pl); if (pl.ball.sunk) backToStart(pl); }
+  if (!potato || potato.over) return;
+  turn = (turn + 1) % players.length;
+  renderHud();
+  if (players[turn].bot) setTimeout(botPutt, 900);
+  else if (players.filter(p => !p.bot).length > 1) setTimeout(() => toast(potatoName(players[turn]) + "'s turn"), 600);
+}
+function botPutt() { // a robot ball: chases someone when it holds the potato, runs away when it doesn't
+  if (!potato || potato.over || mode !== "play" || game !== "potato" || shotLive || !players[turn] || !players[turn].bot) return;
+  const me = players[turn], b = me.ball;
+  let dx, dy, power;
+  if (potato.holder === me.i) {
+    const tgt = players.filter(p => p !== me).sort((p, q) => Math.hypot(p.ball.x - b.x, p.ball.y - b.y) - Math.hypot(q.ball.x - b.x, q.ball.y - b.y))[0].ball;
+    const d = Math.hypot(tgt.x - b.x, tgt.y - b.y), a = Math.atan2(tgt.y - b.y, tgt.x - b.x) + (Math.random() - 0.5) * 0.35;
+    dx = Math.cos(a); dy = Math.sin(a); power = Math.min(MAX_SHOT, 2 + d * 1.6);
+  } else {
+    const h = players[potato.holder].ball, a = Math.atan2(b.y - h.y, b.x - h.x) + (Math.random() - 0.5) * 1.6;
+    dx = Math.cos(a); dy = Math.sin(a); power = 2.5 + Math.random() * 3;
+  }
+  shoot(dx, dy, power * SHOT_MULT);
 }
 
 // ---------------------------------------------------------------------------
@@ -1968,7 +2156,7 @@ canvas.addEventListener("pointerdown", ev => {
   if (mode === "play" && game === "fish") { fishPointer("down", ev); return; }
   if (mode === "play" && isAvatarGame()) { avatarPointer("down", ev); return; }
   down = { x: ev.clientX, y: ev.clientY, t: performance.now(), id: ev.pointerId };
-  if (mode === "play" && (game === "golf" || (game === "bowl" && bowl && bowl.phase === "aim")) && !shotLive && players[turn] && !players[turn].done) {
+  if (mode === "play" && (putting() || (game === "bowl" && bowl && bowl.phase === "aim")) && !shotLive && players[turn] && !players[turn].done && !players[turn].bot) {
     const b = players[turn].ball, g = groundHit(ev, b.z);
     if (g && Math.hypot(g[0] - b.x, g[1] - b.y) < 1.8) {
       aiming = { start: g, cur: g };
@@ -2061,7 +2249,7 @@ function setMode(m) {
   const off = camera.position.clone().sub(controls.target);
   const shooter = game === "blast" || game === "rush";
   blaster.visible = m === "play" && shooter;
-  if (m === "build" || m === "preview") { stopAvatarGames(); stopBowl(); stopFish(); }
+  if (m === "build" || m === "preview") { stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh); }
   if (m === "build") { if (blast) for (const s of blast.shots) scene.remove(s.mesh); blast = null; clearRobots(); rush = null; }
   if (m === "play" && shooter) { // stand behind the blaster, looking out over the range
     // Look at the middle of the targets from behind and above the tee, far enough to see them all.
@@ -2103,6 +2291,20 @@ function renderHud() {
     top.innerHTML = chips(p => p.score);
     const cur = players[turn];
     bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && bowl ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}frame ${Math.min(bowl.frame, BOWL_FRAMES)}/${BOWL_FRAMES} · roll ${bowl.roll} · ${cur.frames.join(" ") || "–"}` : ""}</div>${hint("Drag back from the ball and let go to bowl")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "coins") {
+    top.innerHTML = chips(p => `${p.coins} 🪙`);
+    const cur = players[turn], left = coinDash ? coinDash.coins.length : 0;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && !cur.done ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}shot ${cur.strokes + 1} of ${COIN_SHOTS} · ${left} coins left` : ""}</div>${hint("Drag back from your ball and let go. Roll over coins to grab them!")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "potato") {
+    top.innerHTML = chips(p => `${p.pops} 💥`);
+    const cur = players[turn], hold = potato && players[potato.holder];
+    const secs = potato ? Math.max(0, Math.ceil(potato.fuse)) : 0;
+    const who = cur ? (cur.bot ? `${esc(potName(cur))} is putting…` : `${esc(potName(cur))}'s turn`) : "";
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${hold ? `🥔 <span style="color:${secs <= 5 ? "var(--warn)" : "var(--ink)"}">${esc(potName(hold))} has it · ${secs}s</span> · ${who}` : ""}</div>${hint(cur && potato && turn === potato.holder ? "You have the potato! Putt into someone to pass it." : "Stay away from the potato! Drag back and let go to putt.")}</div>`;
     return;
   }
   if (mode === "play" && game === "koth") {
@@ -2220,6 +2422,8 @@ const GAME_HOWTO = {
   bowl: "Drag back from the ball and let go to bowl. Knock down all 10 pins! 5 frames each.",
   koth: "Stay on the very top to score. Tap the right side to dash and shove the robots off.",
   fish: "Drag back to cast. When a fish bites, tap fast, then hold to reel. Most fish wins.",
+  coins: "Putt over coins to grab them. 5 shots each, and a hole is worth 3 coins. Most coins wins.",
+  potato: "One ball has the ticking potato. Putt into another ball to pass it before it pops! Fewest pops wins.",
 };
 function askPlayers() {
   // Default to whichever game this arena can already be played as.
@@ -2299,6 +2503,17 @@ function showResults() {
     head = rows.length > 1 ? esc(PLAYER_NAMES[rows[0].i]) + " wins!" : `${rows[0].score} points!`;
     table = rows.map(p => `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">${p.frames.join(" ")} · ${p.strikes} strike${p.strikes === 1 ? "" : "s"}</span></td><td>${p.score}</td></tr>`).join("");
     again = "Same lane again";
+  } else if (game === "coins") {
+    const rows = [...players].sort((a, b) => b.coins - a.coins);
+    head = rows.length > 1 ? (rows[0].coins === rows[1].coins ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].coins} coins!`;
+    table = rows.map(p => `<tr><td>${chip(p)}</td><td>${p.coins} 🪙</td></tr>`).join("");
+    again = "Same course again";
+  } else if (game === "potato") {
+    const rows = [...players].sort((a, b) => a.pops - b.pops);
+    const best = rows.filter(p => p.pops === rows[0].pops);
+    head = best.length > 1 ? "It's a tie!" : `${esc(potName(rows[0]))} wins!`;
+    table = rows.map(p => `<tr><td>${chip(p)}${p.bot ? " <span style='color:var(--muted);font-size:13px'>(bot)</span>" : ""}</td><td>${p.pops} 💥</td></tr>`).join("");
+    again = "Play again";
   } else if (game === "koth") {
     const rows = [...players].sort((a, b) => b.score - a.score);
     head = rows.length > 1 ? esc(PLAYER_NAMES[rows[0].i]) + " is king!" : `${rows[0].score.toFixed(1)} seconds on top!`;
@@ -2692,6 +2907,8 @@ function mirrorMake(kind, color, r) {
   if (kind === "bobber") return makeBobber();
   if (kind === "fish") return makeFishMesh(color);
   if (kind === "rod") return makeRod();
+  if (kind === "coin") return makeCoin();
+  if (kind === "potato") return makePotato();
   return new THREE.Group();
 }
 function onSnap(s) {
@@ -3446,15 +3663,15 @@ const GAME_CARDS = [
   { id: "bowl", title: "Bumper Bowling", desc: "Roll down the lane into 10 pins. The rails are bumpers, so every roll counts.", tag: "Sports · New", tint: "#e8c07a" },
   { id: "koth", title: "King of the Hill", desc: "Climb to the top and stay there. Dash to shove robots off the edge.", tag: "Action · New", tint: "#8a5cff" },
   { id: "fish", title: "Beach Fishing", desc: "Cast off the pier, wait for a bite, and reel in the biggest fish. Most fish wins.", tag: "Chill · New", tint: "#2aa3d6" },
+  { id: "coins", title: "Coin Dash", desc: "Putt through a trail of coins. Most coins in five shots wins.", tag: "Golf · New", tint: "#ffd23f" },
+  { id: "potato", title: "Hot Potato Golf", desc: "Putt the ticking potato into a friend's ball before it pops. Play solo vs bots.", tag: "Party · New", tint: "#ff8a3d" },
   { id: "together", title: "Play Together", desc: "Play any game with a friend on their own screen: in the same room, or far away online with a code.", tag: "Online · New", tint: "#2fa8ff" },
   { id: "random", title: "Random Game", desc: "A surprise game, a surprise arena and surprise rules. Every time.", tag: "Surprise", tint: "#8a5cff" },
   { id: "maker", title: "Game Maker", desc: "Pick a game, mix in rule twists, name it and share it.", tag: "Make · New", tint: "#1d2b3a" },
   { id: "workshop", title: "Workshop", desc: "Build your own arena from toy pieces, then play any game in it.", tag: "Build", tint: "#ff8a3d" },
 ];
 const SOON_CARDS = [
-  { title: "Hot Potato Golf", desc: "Putt the ticking ball near your friends before it pops.", tint: "#ff8a3d" },
   { title: "Skee Blast", desc: "Lob shots into rings at different heights for points.", tint: "#ff4fa0" },
-  { title: "Coin Dash", desc: "Putt through coins. Most coins in five shots wins.", tint: "#ffd23f" },
 ];
 const BLAST_SAMPLE = [
   ["start", 4, 0, 0, 0], ["target", 2, 4, 0, 2], ["target", 5, 5, 1, 2], ["target", 7, 3, 0, 2], ["target", 3, 7, 2, 2],
@@ -3487,7 +3704,7 @@ function showHome(on) {
 function stopEverything() {
   $("sheetHost").innerHTML = "";
   if (blast) for (const s of blast.shots) scene.remove(s.mesh);
-  blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish();
+  blast = null; clearRobots(); rush = null; stopAvatarGames(); stopBowl(); stopFish(); clearCoins(); potato = null; if (potatoMesh) scene.remove(potatoMesh);
   for (const pl of players) scene.remove(pl.mesh);
   players = []; shotLive = false; aiming = null;
 }
@@ -3507,6 +3724,8 @@ function randomArenaFor(kind, play) {
   else if (kind === "bowl") { loadList(randomBowlLayout()); rebuildKerbs(); par = null; }
   else if (kind === "koth") { loadList(randomHillLayout()); kerbsDirty = true; par = null; }
   else if (kind === "fish") { clearArena(); par = null; }
+  else if (kind === "coins") { loadList(randomLayout().list); rebuildKerbs(); par = null; }
+  else if (kind === "potato") { loadList(randomPlaygroundLayout().filter(t => t[0] !== "spinner")); rebuildKerbs(); par = null; }
   else {
     for (let i = 0; i < 20; i++) { loadList(randomLayout().list); rebuildKerbs(); if (robotPath()) break; }
     par = null;
@@ -3576,7 +3795,7 @@ function rollTwists(kind) {
   }
   return out;
 }
-const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing" };
+const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing", coins: "Coin Dash", potato: "Potato Golf" };
 function rollRandomGame() {
   transition(() => {
     stopEverything(); showHome(false);
@@ -3690,6 +3909,24 @@ function makeThumbnails() {
       const m = new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: "#fff" }));
       const [x, y] = cellCenter(7, 5); m.position.set(x, 1 + TOP + 0.15, -y); m.castShadow = true; scene.add(m); return [m];
     });
+    thumbs.coins = snapshot(SAMPLE, () => {
+      const out = [];
+      for (const [cx, cy, l] of [[5, 2, 0], [6, 3, 0], [5, 4, 0], [6, 5, 1], [3, 6, 0]]) {
+        const [x, y] = cellCenter(cx, cy), m = makeCoin(); m.position.set(x, l + TOP + 0.3, -y); m.rotation.y = cx; scene.add(m); out.push(m);
+      }
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 14), new THREE.MeshStandardMaterial({ color: "#fff" }));
+      const [bx, by] = cellCenter(4, 1); b.position.set(bx, TOP + 0.15, -by); scene.add(b); out.push(b);
+      return out;
+    });
+    thumbs.potato = snapshot(SAMPLE, () => {
+      const out = [];
+      for (const [cx, cy, l, c] of [[4, 1, 0, 0], [6, 3, 0, 1], [5, 6, 0, 2]]) {
+        const [x, y] = cellCenter(cx, cy), m = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 14), new THREE.MeshStandardMaterial({ color: PLAYER_COLORS[c] }));
+        m.position.set(x, l + TOP + 0.22, -y); m.castShadow = true; scene.add(m); out.push(m);
+        if (c === 1) { const pt = makePotato(); pt.scale.setScalar(1.6); pt.position.set(x, l + TOP + 0.95, -y); scene.add(pt); out.push(pt); }
+      }
+      return out;
+    });
     thumbs.blast = snapshot(BLAST_SAMPLE, () => {
       const [x, y] = cellCenter(4, 0); blaster.position.set(x, TOP, -y); blaster.visible = true; blasterMat.color.set("#ffd23f");
       barrelPivot.rotation.y = 0; return [];
@@ -3800,12 +4037,15 @@ function frame(now) {
     if (b) b.rotation.x += ((b.userData.baseX || 0) - b.rotation.x) * Math.min(1, dt * 10);
   }
 
-  if (mode === "play" && game === "golf" && players.length) {
+  if (mode === "play" && putting() && players.length) {
     const SUB = 8, h = dt / SUB;
     for (let s = 0; s < SUB; s++) {
       for (const pl of players) step(pl.ball, h);
       for (let i = 0; i < players.length; i++) for (let j = i + 1; j < players.length; j++) ballsCollide(players[i].ball, players[j].ball);
+      if (game === "potato") potatoTouch();
     }
+    if (game === "coins") updateCoins(dt);
+    if (game === "potato") updatePotato(dt);
     for (const pl of players) {
       const b = pl.ball;
       if (b.sunk && b.sinkT !== undefined && b.sinkT < 1) { b.sinkT += dt * 3; b.x += (b.cup[0] - b.x) * 0.3; b.y += (b.cup[1] - b.y) * 0.3; b.z = b.cupZ - b.sinkT * 0.25; }
