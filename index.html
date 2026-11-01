@@ -1616,6 +1616,7 @@ const isAvatarGame = (g = game) => AVATAR_GAMES.includes(g);
 
 const capsuleGeo = new THREE.CapsuleGeometry(0.24, 0.3, 6, 14), visorGeo = new THREE.BoxGeometry(0.36, 0.15, 0.12);
 const footGeo = new THREE.BoxGeometry(0.12, 0.08, 0.2), pupilSmall = new THREE.SphereGeometry(0.045, 10, 8);
+const smileGeo = new THREE.TorusGeometry(0.07, 0.018, 6, 12, Math.PI); // a little U-shaped smile, drawn under the visor
 function makeFigure(color) {
   const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color, roughness: 0.45 });
   const body = new THREE.Mesh(capsuleGeo, mat); body.position.y = 0.5;
@@ -1624,7 +1625,8 @@ function makeFigure(color) {
   const e2 = e1.clone(); e2.position.x = 0.07;
   const f1 = new THREE.Mesh(footGeo, darkMat); f1.position.set(-0.1, 0.05, -0.02);
   const f2 = f1.clone(); f2.position.x = 0.1;
-  g.add(body, visor, e1, e2, f1, f2);
+  const smile = new THREE.Mesh(smileGeo, darkMat); smile.position.set(0, 0.52, -0.25); smile.rotation.z = Math.PI; // flip the arc so it curls up
+  g.add(body, visor, e1, e2, smile, f1, f2);
   g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   g.userData.body = body; g.userData.feet = [f1, f2];
   netTrack(g, "figure", color);
