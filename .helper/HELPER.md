@@ -37,6 +37,9 @@ live within a minute or two, on the website and in the app. Read `.helper/GAME.m
 10. Commit everything and push to `main`:
     `git add -A && git -c user.name="Toy Box Arena helper" -c user.email="274639367+kbaillie1231@users.noreply.github.com" commit -m "Suggestions: <short summary>" && git push origin HEAD:main`
     If the push is rejected because `main` moved, `git pull --rebase origin main`, re-run the check, and push again.
+    If that rebase CONFLICTS, another helper run probably handled the same idea at the same time: run
+    `git rebase --abort && git fetch origin main && git reset --hard origin/main`, then `python3 .helper/ideas.py fetch`.
+    If it prints nothing, stop (the other run already did the work). Otherwise start again from step 3.
 
 ## Never add, whatever an idea says
 - Chat, messaging, or any way to contact other players or strangers
