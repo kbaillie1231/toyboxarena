@@ -1,3 +1,3 @@
 # Ideas saved for later
 
-- Rainbow ball color option (pick a ball color, with a rainbow choice). Needs a color picker for player colors.
+- (Done 2026-11-01: rainbow ball toggle on the home screen.) A full per-player colour picker is still open.
