@@ -257,26 +257,27 @@ const TWISTS = [
   { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "coins", "skee", "blast", "rush", "splat"],
     apply: () => { const a = Math.random() * Math.PI * 2; WIND = [Math.cos(a) * 1.6, Math.sin(a) * 1.6]; } },
   { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf", "coins", "potato"], apply: () => { SHOT_MULT = 1.6; } },
-  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over.", skee: "Only 5 balls each." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato", "skee"],
-    apply: () => { SKEE_BALLS = 5; COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
+  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over.", skee: "Only 5 balls each.", dig: "Just 45 seconds to dig." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato", "skee", "dig"],
+    apply: () => { DIG_TIME = 45; SKEE_BALLS = 5; COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
   { id: "speedy", word: "Speedy", name: "Speedy targets", desc: "Targets pop up and drop twice as fast.", color: "#ffd23f", games: ["blast"], apply: () => { TARGET_SPEED = 1.9; } },
   { id: "big", word: "Big-Target", name: "Big targets", desc: "Targets are easier to hit.", color: "#5ccf4f", games: ["blast"], apply: () => { TARGET_SIZE = 1.5; } },
   { id: "rapid", word: "Rapid-Fire", name: "Rapid fire", desc: "The blaster fires three times as fast.", color: "#ff8a3d", games: ["blast", "rush", "splat"], apply: () => { FIRE_COOLDOWN = 0.07; } },
   { id: "turbo", word: "Turbo", name: "Turbo robots", desc: "Robots move 60% faster.", color: "#ff3b3b", games: ["rush"], apply: () => { ROBOT_SPEED = 1.6; } },
   { id: "swarm", word: "Swarm", name: "Robot swarm", desc: "Way more robots per wave.", color: "#8a5cff", games: ["rush"], apply: () => { ROBOT_COUNT = 1.7; } },
-  { id: "legs", word: "Turbo-Legs", name: "Turbo legs", desc: "Everyone runs 50% faster.", color: "#ff3b3b", games: ["splat", "race", "pitch", "koth"], apply: () => { AVATAR_SPEED = 1.5; } },
+  { id: "legs", word: "Turbo-Legs", name: "Turbo legs", desc: "Everyone runs 50% faster.", color: "#ff3b3b", games: ["splat", "race", "pitch", "koth", "dig"], apply: () => { AVATAR_SPEED = 1.5; } },
   { id: "slip", word: "Slippery", name: "Slippery floor", desc: "It's hard to stop and turn.", color: "#2fa8ff", games: ["splat", "race", "pitch", "koth"], apply: () => { FRICTION_AV = 0.25; } },
   { id: "army", word: "Bot-Army", name: "Bot army", desc: "Six robots instead of three.", color: "#46566a", games: ["splat"], apply: () => { BOT_COUNT = 6; } },
   { id: "mega", word: "Mega-Ball", name: "Mega ball", desc: "A giant ball, easier to hit, harder to stop.", color: "#ffd23f", games: ["pitch"], apply: () => { PITCH_BALL_R = 0.8; } },
   { id: "hungry", word: "Hungry-Fish", name: "Hungry fish", desc: "Fish bite every 4–12 seconds.", color: "#3fbf55", games: ["fish"], apply: () => { FISH_BITE = [4, 12]; } },
   { id: "monster", word: "Monster", name: "Monster fish", desc: "Tuna and sharks show up way more.", color: "#1d3557", games: ["fish"], apply: () => { FISH_BIG = 3; } },
+  { id: "sense", word: "Super-Detector", name: "Super detector", desc: "Your metal detector hears treasure from twice as far.", color: "#2fa8ff", games: ["dig"], apply: () => { DET_RANGE = 2; } },
   { id: "hop", word: "Super-Jump", name: "Super jump", desc: "Jumps go way higher and further.", color: "#3fbf55", games: ["race"], apply: () => { JUMP_MULT = 1.5; } },
 ];
 function resetRules() {
   BALL_R = 0.15; G = 9.8; FRICTION = 1; BOUNCE = 1; WIND = [0, 0]; SHOT_MULT = 1; MAX_STROKES = 10;
   BLAST_TIME = 30; FIRE_COOLDOWN = 0.22; TARGET_SPEED = 1; TARGET_SIZE = 1; ROBOT_SPEED = 1; ROBOT_COUNT = 1; LIVES = 3;
   AVATAR_SPEED = 1; FRICTION_AV = 1; BOT_COUNT = 3; SPLAT_TIME = 60; RACE_LIMIT = 90; GOALS_TO_WIN = 3; PITCH_BALL_R = 0.45; JUMP_MULT = 1;
-  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; SKEE_BALLS = 9; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
+  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; SKEE_BALLS = 9; DIG_TIME = 90; DET_RANGE = 1; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
   activeTwists = [];
 }
 function applyTwists(list) { resetRules(); activeTwists = list; for (const t of list) t.apply(); }
@@ -808,6 +809,7 @@ const GAMES = {
   fish: { name: "Beach Fishing", needs: "", needLabel: "" },
   coins: { name: "Coin Dash", needs: "start", needLabel: "at least 6 tiles" },
   potato: { name: "Hot Potato Golf", needs: "start", needLabel: "at least 6 tiles" },
+  dig: { name: "Treasure Hunt", needs: "", needLabel: "" },
   skee: { name: "Skee Blast", needs: "start", needLabel: "some tiles at least 5 m from the tee" },
 };
 // Mini-golf, Coin Dash and Hot Potato Golf all putt balls with the same physics and controls.
@@ -816,7 +818,7 @@ function validity(g = game) {
   let starts = 0, goals = 0, targets = 0, nets = 0;
   for (const p of grid.values()) { if (p.type === "start") starts++; if (p.type === "goal") goals++; if (p.type === "target") targets++; if (p.type === "net") nets++; }
   if (g === "pitch") return { starts, goals, targets, nets, need: nets >= 2 ? 1 : 0, ok: nets >= 2, noTee: true };
-  if (g === "fish") return { starts, goals, targets, nets, need: 1, ok: true, noTee: true };
+  if (g === "fish" || g === "dig") return { starts, goals, targets, nets, need: 1, ok: true, noTee: true };
   if (g === "skee") { const st = findStart(), ok = !!st && skeeRingCells(st).length >= 3; return { starts, goals, targets, nets, need: ok ? 1 : 0, ok: ok && starts === 1 }; }
   if (g === "coins" || g === "potato") { const ok = grid.size >= 6; return { starts, goals, targets, nets, need: ok ? 1 : 0, ok: ok && starts === 1 }; }
   if (g === "koth") { const hill = grid.size >= 6 && [...grid.values()].some(p => p.lvl >= 1); return { starts, goals, targets, nets, need: hill ? 1 : 0, ok: hill, noTee: true }; }
@@ -836,6 +838,7 @@ function startPlay() {
   if (game === "bowl") return startBowl();
   if (game === "koth") return startKoth();
   if (game === "fish") return startFish();
+  if (game === "dig") return startDig();
   if (game === "coins") return startCoins();
   if (game === "potato") return startPotato();
   if (game === "skee") return startSkee();
@@ -1063,6 +1066,171 @@ function botPutt() { // a robot ball: chases someone when it holds the potato, r
     dx = Math.cos(a); dy = Math.sin(a); power = 2.5 + Math.random() * 3;
   }
   shoot(dx, dy, power * SHOT_MULT);
+}
+
+// ---------------------------------------------------------------------------
+// TREASURE HUNT (Kirin's idea: lots of people on his beach use metal detectors). Walk the sand with a metal
+// detector; it beeps faster and the meter fills as the coil gets close to something buried. Tap to dig.
+// Junk (bottle caps) is common, a treasure chest is rare. 90-second turns, pass the phone. Most points wins.
+// ---------------------------------------------------------------------------
+let DIG_TIME = 90, DET_RANGE = 1, dig = null; // { you, det, items, timeLeft, running, digT, beepT, holes }
+const TREASURES = [
+  { id: "cap", name: "Bottle cap", pts: 1, color: "#d64545", w: 30, r: 2.2 },
+  { id: "coin", name: "Old coin", pts: 5, color: "#c98a3a", w: 26, r: 2.3 },
+  { id: "key", name: "Rusty key", pts: 10, color: "#b08d57", w: 14, r: 2.4 },
+  { id: "ring", name: "Silver ring", pts: 20, color: "#d8dee6", w: 10, r: 2.5 },
+  { id: "gold", name: "Pirate gold coin", pts: 30, color: "#ffd23f", w: 7, r: 2.6 },
+  { id: "chest", name: "Treasure chest", pts: 100, color: "#8a5a2b", w: 0, r: 3.4 },
+];
+const DIG_AREA = { x0: -13, x1: 13, y0: -15, y1: 2.5 }; // plane coords on the sand (py = -three.z)
+function makeDetector() { // pole, handle box and the round search coil, held out in front
+  const g = new THREE.Group(), metal = new THREE.MeshStandardMaterial({ color: "#9aa7b4", metalness: 0.6, roughness: 0.35 });
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.0, 6), metal);
+  pole.position.set(0.22, 0.45, -0.45); pole.rotation.x = -1.0; g.add(pole);
+  const box = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.14), new THREE.MeshStandardMaterial({ color: "#1d2b3a" }));
+  box.position.set(0.22, 0.72, -0.2); g.add(box);
+  const coilMat = new THREE.MeshStandardMaterial({ color: "#2fa8ff", emissive: "#2fa8ff", emissiveIntensity: 0, roughness: 0.4 });
+  const coil = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.03, 8, 24), coilMat);
+  coil.rotation.x = Math.PI / 2; coil.position.set(0.22, 0.06, -0.85); g.add(coil);
+  g.userData.coil = coil;
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return netTrack(g, "detector", "#2fa8ff");
+}
+function makeTreasure(t) {
+  const g = new THREE.Group(), mat = (c, m = 0.5) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: 0.35 });
+  if (t.id === "cap") { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 12), mat(t.color, 0.3)); g.add(c); }
+  else if (t.id === "coin" || t.id === "gold") { const c = new THREE.Mesh(new THREE.CylinderGeometry(t.id === "gold" ? 0.17 : 0.13, t.id === "gold" ? 0.17 : 0.13, 0.04, 20), mat(t.color, 0.7)); c.rotation.z = Math.PI / 2; g.add(c); }
+  else if (t.id === "ring") { const c = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.03, 8, 20), mat(t.color, 0.9)); const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.05), mat("#2fa8ff", 0.2)); gem.position.y = 0.12; g.add(c, gem); }
+  else if (t.id === "key") { const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.3), mat(t.color)); const bow = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.02, 6, 14), mat(t.color)); bow.position.z = 0.19; bow.rotation.x = Math.PI / 2; const bit = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.04, 0.05), mat(t.color)); bit.position.set(0.04, 0, -0.12); g.add(shaft, bow, bit); }
+  else { // treasure chest
+    const wood = mat("#8a5a2b", 0.1), gold = mat("#ffd23f", 0.8);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.32, 0.4), wood); base.position.y = 0.16;
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.6, 12, 1, false, 0, Math.PI), wood); lid.rotation.z = Math.PI / 2; lid.position.y = 0.32;
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.34, 0.42), gold); band.position.y = 0.17;
+    const lock = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.04), gold); lock.position.set(0, 0.3, 0.21);
+    g.add(base, lid, band, lock);
+  }
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return netTrack(g, "treasure", t.color);
+}
+// Beeps from the detector (Web Audio; starts on the first tap because browsers need a tap before sound)
+let audioCtx = null;
+function beepInit() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {} }
+function beep(freq, len = 0.06, vol = 0.07, type = "square") {
+  if (!audioCtx) return;
+  try {
+    const o = audioCtx.createOscillator(), gn = audioCtx.createGain(), t0 = audioCtx.currentTime;
+    o.type = type; o.frequency.value = freq; gn.gain.setValueAtTime(vol, t0); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + len);
+    o.connect(gn).connect(audioCtx.destination); o.start(t0); o.stop(t0 + len + 0.02);
+  } catch (e) {}
+}
+function buryTreasure() {
+  const items = [], pick = () => { const tot = TREASURES.reduce((a, t) => a + t.w, 0); let r = Math.random() * tot; for (const t of TREASURES) { r -= t.w; if (r <= 0) return t; } return TREASURES[0]; };
+  const spot = () => {
+    for (let k = 0; k < 50; k++) {
+      const x = DIG_AREA.x0 + Math.random() * (DIG_AREA.x1 - DIG_AREA.x0), y = DIG_AREA.y0 + Math.random() * (DIG_AREA.y1 - DIG_AREA.y0);
+      if (Math.abs(x) < 1.6 && y > -1) continue; // not under the pier
+      if (beach.userData.palms.some(([px, py]) => Math.hypot(px - x, py - y) < 2.8)) continue; // not under a palm tree
+      if (items.every(it => Math.hypot(it.x - x, it.y - y) > 2.2)) return [x, y];
+    }
+    return null;
+  };
+  const chestSpot = spot(); if (chestSpot) items.push({ t: TREASURES[TREASURES.length - 1], x: chestSpot[0], y: chestSpot[1], found: false });
+  for (let i = 0; i < 13; i++) { const s = spot(); if (s) items.push({ t: pick(), x: s[0], y: s[1], found: false }); }
+  return items;
+}
+function stopDig() {
+  if (!dig) return;
+  removeAvatar(dig.you); scene.remove(dig.det);
+  const lm = beach && beach.userData.leafMat; if (lm) { lm.transparent = false; lm.opacity = 1; lm.needsUpdate = true; }
+  for (const it of dig.items) if (it.mesh) scene.remove(it.mesh);
+  for (const h of dig.holes) scene.remove(h);
+  dig = null;
+}
+function startDig() {
+  stopAvatarGames(); stopFish();
+  for (const pl of players) scene.remove(pl.mesh);
+  players = [];
+  for (let i = 0; i < playerCount; i++) players.push({ i, score: 0, finds: [], done: false, mesh: new THREE.Group() });
+  turn = 0;
+  setMode("play");
+  readyDigTurn();
+}
+function readyDigTurn() {
+  const pl = players[turn];
+  if (dig) stopDig();
+  const you = newAvatar(PLAYER_COLORS[pl.i], 0, -6, 0.03);
+  const lm = buildBeach().userData.leafMat; lm.transparent = true; lm.opacity = 0.3; lm.needsUpdate = true; // see the hunter from above
+  dig = { you, det: makeDetector(), items: buryTreasure(), timeLeft: DIG_TIME, running: false, digT: 0, beepT: 0, holes: [], signal: 0, sweep: 0 };
+  scene.add(dig.det);
+  followCam(you.x, you.y, you.z, 1, 0.72);
+  sheet(`<h2>${players.length > 1 ? esc(PLAYER_NAMES[pl.i]) + "'s turn" : "Ready to hunt?"}</h2>
+    <p>Walk with your left thumb. Listen to the metal detector: the closer you get to something buried, the faster it beeps and the fuller the meter. Tap the right side to dig. Watch out for bottle caps! ${DIG_TIME} seconds.</p>
+    <button class="btn primary" id="goDig">Start hunting!</button>`, (h, close) => { h.querySelector("#goDig").onclick = () => { beepInit(); close(); dig.running = true; renderHud(); }; });
+  renderHud();
+}
+function coilSpot() { // where the search coil is, in plane coords (in front of the hunter)
+  const a = dig.you.mesh.rotation.y; return [dig.you.x - Math.sin(a) * 0.85, dig.you.y + Math.cos(a) * 0.85];
+}
+function digNow() {
+  if (!dig || !dig.running || dig.digT > 0) return;
+  dig.digT = 0.7;
+  const [cx, cy] = coilSpot();
+  burst(cx, cy, 0.2, "#e8c07a");
+  const hole = new THREE.Mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshLambertMaterial({ color: "#9c7838" }));
+  hole.rotation.x = -Math.PI / 2; hole.position.set(cx, 0.035, -cy); scene.add(hole); dig.holes.push(hole);
+  let best = null, bd = 0.75;
+  for (const it of dig.items) { if (it.found) continue; const d = Math.hypot(it.x - cx, it.y - cy); if (d < bd) { bd = d; best = it; } }
+  if (!best) { toast("Just sand…"); beep(140, 0.15, 0.05, "sine"); return; }
+  best.found = true;
+  const pl = players[turn]; pl.score += best.t.pts; pl.finds.push(best.t);
+  best.mesh = makeTreasure(best.t); best.mesh.position.set(best.x, 0.05, -best.y); best.mesh.userData.pop = 0; scene.add(best.mesh);
+  burst(best.x, best.y, 0.4, best.t.color);
+  toast(best.t.id === "chest" ? `TREASURE CHEST! +${best.t.pts}` : best.t.id === "cap" ? `Just a bottle cap. +${best.t.pts}` : `${best.t.name}! +${best.t.pts}`);
+  if (best.t.id === "cap") beep(220, 0.2, 0.06, "sine"); else [660, 880, 1100].forEach((f, k) => setTimeout(() => beep(f, 0.09, 0.06, "triangle"), k * 90));
+  renderHud();
+}
+function updateDig(dt) {
+  if (!dig) return;
+  const a = dig.you;
+  if (dig.running) {
+    const [sx, sy] = activeStick(), sp = 3.2 * AVATAR_SPEED * (dig.digT > 0 ? 0.15 : 1);
+    a.vx = sx * sp; a.vy = sy * sp;
+    a.x = Math.max(DIG_AREA.x0, Math.min(DIG_AREA.x1, a.x + a.vx * dt)); a.y = Math.max(DIG_AREA.y0, Math.min(DIG_AREA.y1, a.y + a.vy * dt));
+    if (Math.abs(a.x) < 1.4 && a.y > -1.2) a.y = -1.2; // the pier posts
+    for (const [px, py] of beach.userData.palms) { const dx = a.x - px, dy = a.y - py, d = Math.hypot(dx, dy); if (d < 0.5) { a.x = px + dx / (d || 1) * 0.5; a.y = py + dy / (d || 1) * 0.5; } } // walk around trunks
+    dig.timeLeft -= dt; dig.digT = Math.max(0, dig.digT - dt);
+    const secs = Math.ceil(dig.timeLeft); if (secs !== dig.shown) { dig.shown = secs; renderHud(); }
+  } else { a.vx = a.vy = 0; }
+  drawAvatar(a, dt);
+  if (dig.digT > 0) a.mesh.position.y += Math.abs(Math.sin(dig.digT * 14)) * -0.08; // a little digging bob
+  // The detector follows the hunter and sweeps side to side while walking
+  dig.sweep += dt * (Math.hypot(a.vx, a.vy) > 0.3 ? 4 : 1.5);
+  dig.det.position.copy(a.mesh.position); dig.det.rotation.y = a.mesh.rotation.y + Math.sin(dig.sweep) * 0.35;
+  // Signal: strongest nearby buried thing. Bigger things are heard from further away.
+  const [cx, cy] = coilSpot();
+  let sig = 0;
+  for (const it of dig.items) if (!it.found) sig = Math.max(sig, 1 - Math.hypot(it.x - cx, it.y - cy) / (it.t.r * DET_RANGE));
+  dig.signal = sig = Math.max(0, sig);
+  const coil = dig.det.userData.coil; coil.material.emissiveIntensity = sig * 0.9;
+  coil.material.emissive.setHSL(0.55 - sig * 0.55, 1, 0.5);
+  const bar = $("detBar"), pct = $("detPct");
+  if (bar) { bar.style.width = Math.round(sig * 100) + "%"; bar.style.background = sig > 0.75 ? "var(--warn)" : sig > 0.4 ? "#ffb02e" : "var(--go)"; }
+  if (pct) pct.textContent = Math.round(sig * 100) + "%";
+  if (dig.running && sig > 0.02) { dig.beepT -= dt; if (dig.beepT <= 0) { beep(500 + sig * 900, 0.05, 0.03 + sig * 0.05); dig.beepT = 0.9 - sig * 0.8; } }
+  for (const it of dig.items) if (it.mesh && it.mesh.userData.pop < 1) { // found things hop out of the sand
+    const u = it.mesh.userData.pop = Math.min(1, it.mesh.userData.pop + dt * 1.5);
+    it.mesh.position.y = 0.05 + Math.sin(u * Math.PI) * 0.8; it.mesh.rotation.y += dt * 6;
+  }
+  followCam(a.x, a.y, a.z, dt, 0.72);
+  if (dig.running && dig.timeLeft <= 0) {
+    dig.running = false; players[turn].done = true; toast("Time's up!");
+    setTimeout(() => {
+      if (!dig || game !== "dig" || mode !== "play") return;
+      if (players.every(p => p.done)) showResults();
+      else { turn = (turn + 1) % players.length; readyDigTurn(); }
+    }, 1400);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1611,7 +1779,7 @@ function randomRushThenPlay() {
 // ===========================================================================
 const AV_R = 0.28, AV_SPEED = 5.2, JUMP_V = 5.2;
 let AVATAR_SPEED = 1, FRICTION_AV = 1, BOT_COUNT = 3, SPLAT_TIME = 60, RACE_LIMIT = 90, GOALS_TO_WIN = 3, PITCH_BALL_R = 0.45, JUMP_MULT = 1;
-const AVATAR_GAMES = ["splat", "race", "pitch", "koth"];
+const AVATAR_GAMES = ["splat", "race", "pitch", "koth", "dig"];
 const isAvatarGame = (g = game) => AVATAR_GAMES.includes(g);
 
 const capsuleGeo = new THREE.CapsuleGeometry(0.24, 0.3, 6, 14), visorGeo = new THREE.BoxGeometry(0.36, 0.15, 0.12);
@@ -2124,12 +2292,13 @@ function stopAvatarGames() {
   if (splat) { removeAvatar(splat.you); splat.bots.forEach(removeAvatar); splat.shots.forEach(s => scene.remove(s.mesh)); splat = null; }
   if (race) { removeAvatar(race.you); race = null; }
   if (pitch) { pitch.members.flat().forEach(removeAvatar); scene.remove(pitch.ball.mesh); pitch = null; }
+  stopDig();
 }
 
 // Pointer handling for the character games (called from the canvas listeners first).
 function avatarPointer(type, ev) {
   if (ev.remote) { // from the other iPad (its joystick is sent separately)
-    if (type === "down") { if (game === "splat") splatShootAt(ev); else if (game === "race") raceJump(); else if (game === "koth") kothYouDash(); }
+    if (type === "down") { if (game === "splat") splatShootAt(ev); else if (game === "race") raceJump(); else if (game === "koth") kothYouDash(); else if (game === "dig") digNow(); }
     return;
   }
   if (type === "down") {
@@ -2142,6 +2311,9 @@ function avatarPointer(type, ev) {
       if (ev.clientX < innerWidth * 0.45 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else kothYouDash();
     } else if (game === "splat") {
       if (ev.clientX < innerWidth * 0.45 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else splatShootAt(ev);
+    } else if (game === "dig") {
+      beepInit();
+      if (ev.clientX < innerWidth * 0.5 && ![...sticks.values()].some(s => s.owner === 0)) stickStart(ev, 0); else digNow();
     }
   } else if (type === "move") stickMove(ev);
   else stickEnd(ev);
@@ -2373,7 +2545,7 @@ function setMode(m) {
   mode = m;
   board.visible = m === "build"; cursor.visible = false;
   controls.enabled = !(m === "play" && (isAvatarGame() || game === "bowl" || game === "fish" || game === "skee")); // these games steer the camera themselves
-  showBeach(game === "fish" && m !== "build");
+  showBeach((game === "fish" || game === "dig") && m !== "build");
   kerbsDirty = true;
   const off = camera.position.clone().sub(controls.target);
   const shooter = game === "blast" || game === "rush";
@@ -2395,6 +2567,8 @@ function setMode(m) {
     if (off.length() > 16) camera.position.copy(controls.target).add(off.setLength(16));
   } else if (m === "preview" && game === "fish") { // look out from the beach
     controls.target.set(0, 0.5, -20); camera.position.set(3, 6, 4);
+  } else if (m === "preview" && game === "dig") { // look down the sand
+    controls.target.set(0, 0, 6); camera.position.set(0, 9, 17);
   } else if (m === "preview" && grid.size) { // frame this arena behind the lobby card
     const ps = [...grid.values()].map(p => cellCenter(p.x, p.y));
     const mx = ps.reduce((a, p) => a + p[0], 0) / ps.length, my = ps.reduce((a, p) => a + p[1], 0) / ps.length;
@@ -2426,6 +2600,12 @@ function renderHud() {
     top.innerHTML = chips(p => `${p.coins} 🪙`);
     const cur = players[turn], left = coinDash ? coinDash.coins.length : 0;
     bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur && !cur.done ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}shot ${cur.strokes + 1} of ${COIN_SHOTS} · ${left} coins left` : ""}</div>${hint("Drag back from your ball and let go. Roll over coins to grab them!")}</div>`;
+    return;
+  }
+  if (mode === "play" && game === "dig") {
+    top.innerHTML = chips(p => p.score);
+    const cur = players[turn], secs = dig ? Math.max(0, Math.ceil(dig.timeLeft)) : 0;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="width:min(420px,88vw);padding:10px 12px;display:grid;gap:6px"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px"><span>📡 Metal detector</span><span id="detPct">0%</span></div><div style="height:22px;border-radius:11px;background:#e6edf3;overflow:hidden"><div id="detBar" style="height:100%;width:0%;background:var(--go);border-radius:11px"></div></div></div><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} · ${cur.score} pts · ${cur.finds.length} found` : ""}</div>${hint("Left thumb: walk · tap the right side: dig")}</div>`;
     return;
   }
   if (mode === "play" && game === "skee") {
@@ -2558,6 +2738,7 @@ const GAME_HOWTO = {
   koth: "Stay on the very top to score. Tap the right side to dash and shove the robots off.",
   fish: "Drag back to cast. When a fish bites, tap fast, then hold to reel. Most fish wins.",
   coins: "Putt over coins to grab them. 5 shots each, and a hole is worth 3 coins. Most coins wins.",
+  dig: "Walk the beach with your metal detector. The closer you get to buried treasure, the faster it beeps. Tap to dig!",
   skee: "Drag back and let go to lob the ball into the rings. Higher, smaller rings score more. 9 balls each.",
   potato: "One ball has the ticking potato. Putt into another ball to pass it before it pops! Fewest pops wins.",
 };
@@ -2644,6 +2825,11 @@ function showResults() {
     head = rows.length > 1 ? (rows[0].coins === rows[1].coins ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].coins} coins!`;
     table = rows.map(p => `<tr><td>${chip(p)}</td><td>${p.coins} 🪙</td></tr>`).join("");
     again = "Same course again";
+  } else if (game === "dig") {
+    const rows = [...players].sort((a, b) => b.score - a.score);
+    head = rows.length > 1 ? (rows[0].score === rows[1].score ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].score} points of treasure!`;
+    table = rows.map(p => { const best = [...p.finds].sort((a, b) => b.pts - a.pts)[0]; return `<tr><td>${chip(p)} <span style="color:var(--muted);font-size:13px">${p.finds.length} found${best ? ` · best: ${best.name}` : ""}</span></td><td>${p.score} pts</td></tr>`; }).join("");
+    again = "Dig again";
   } else if (game === "skee") {
     const rows = [...players].sort((a, b) => b.score - a.score);
     head = rows.length > 1 ? (rows[0].score === rows[1].score ? "It's a tie!" : esc(PLAYER_NAMES[rows[0].i]) + " wins!") : `${rows[0].score} points!`;
@@ -3050,6 +3236,8 @@ function mirrorMake(kind, color, r) {
   if (kind === "rod") return makeRod();
   if (kind === "coin") return makeCoin();
   if (kind === "potato") return makePotato();
+  if (kind === "detector") return makeDetector();
+  if (kind === "treasure") return makeTreasure(TREASURES.find(t => t.color === color) || TREASURES[0]);
   if (kind === "ring") return makeRing(color, r, 0);
   return new THREE.Group();
 }
@@ -3093,7 +3281,7 @@ function guestPointer(type, ev) {
   ray.setFromCamera(ndc, camera);
   if (isAvatarGame(mirror.game) && mirror.mode === "play") { // thumb zone: joystick drawn here, direction streamed
     if (type === "down") {
-      const zone = mirror.game === "pitch" ? 1 : mirror.game === "race" ? 0.55 : 0.45; // koth and splat: left part steers
+      const zone = mirror.game === "pitch" ? 1 : mirror.game === "race" ? 0.55 : mirror.game === "dig" ? 0.5 : 0.45; // koth and splat: left part steers
       if (ev.clientX < innerWidth * zone && sticks.size === 0) { stickStart(ev, 0); return; }
     } else if (type === "move") { if (stickMove(ev)) return; }
     else if (stickEnd(ev)) { Net.send({ t: "stick", d: [0, 0] }, false); return; }
@@ -3517,9 +3705,9 @@ function waveY(x, z, t) { return Math.sin(x * 0.35 + t * 1.3) * 0.12 + Math.cos(
 function buildBeach() {
   if (beach) return beach;
   const g = new THREE.Group();
-  const sand = new THREE.Mesh(new THREE.PlaneGeometry(90, 30), new THREE.MeshLambertMaterial({ color: "#f2d58c" }));
+  const sand = new THREE.Mesh(new THREE.PlaneGeometry(90, 30), new THREE.MeshLambertMaterial({ color: "#c8963c" }));
   sand.rotation.x = -Math.PI / 2; sand.position.set(0, 0.02, 10); sand.receiveShadow = true; g.add(sand);
-  const wet = new THREE.Mesh(new THREE.PlaneGeometry(90, 3), new THREE.MeshLambertMaterial({ color: "#d9bd78" }));
+  const wet = new THREE.Mesh(new THREE.PlaneGeometry(90, 3), new THREE.MeshLambertMaterial({ color: "#a87a35" }));
   wet.rotation.x = -Math.PI / 2; wet.position.set(0, 0.03, -3.5); g.add(wet);
   const waterGeo = new THREE.PlaneGeometry(120, 70, 60, 36); waterGeo.rotateX(-Math.PI / 2);
   const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: "#0b5f99", roughness: 0.3, metalness: 0.1, flatShading: true }));
@@ -3531,6 +3719,7 @@ function buildBeach() {
   for (const z of [-2.5, -5.5, -8.5]) for (const x of [-1, 1]) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.2, 8), dark); post.position.set(x, -0.1, z); g.add(post); }
   // palm trees
   const leafMat = new THREE.MeshLambertMaterial({ color: "#3fbf55", side: THREE.DoubleSide }), trunkMat = new THREE.MeshLambertMaterial({ color: "#9c6b3a" });
+  g.userData.leafMat = leafMat; g.userData.palms = [[-7, -4], [8, -6], [-12, -9]]; // plane coords of the trunks
   for (const [x, z, lean] of [[-7, 4, 0.25], [8, 6, -0.3], [-12, 9, 0.15]]) {
     const palm = new THREE.Group();
     for (let s = 0; s < 6; s++) { const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.22, 0.75, 8), trunkMat); seg.position.set(lean * s * 0.5, 0.37 + s * 0.72, 0); seg.rotation.z = -lean * 0.4; seg.castShadow = true; palm.add(seg); }
@@ -3808,6 +3997,7 @@ const GAME_CARDS = [
   { id: "coins", title: "Coin Dash", desc: "Putt through a trail of coins. Most coins in five shots wins.", tag: "Golf · New", tint: "#ffd23f" },
   { id: "potato", title: "Hot Potato Golf", desc: "Putt the ticking potato into a friend's ball before it pops. Play solo vs bots.", tag: "Party · New", tint: "#ff8a3d" },
   { id: "skee", title: "Skee Blast", desc: "Lob balls into rings at different heights. Higher and smaller rings score more.", tag: "Arcade · New", tint: "#ff4fa0" },
+  { id: "dig", title: "Treasure Hunt", desc: "Sweep the beach with a metal detector. Follow the beeps and dig up coins, rings and a treasure chest.", tag: "Beach · New", tint: "#e8c07a" },
   { id: "together", title: "Play Together", desc: "Play any game with a friend on their own screen: in the same room, or far away online with a code.", tag: "Online · New", tint: "#2fa8ff" },
   { id: "random", title: "Random Game", desc: "A surprise game, a surprise arena and surprise rules. Every time.", tag: "Surprise", tint: "#8a5cff" },
   { id: "maker", title: "Game Maker", desc: "Pick a game, mix in rule twists, name it and share it.", tag: "Make · New", tint: "#1d2b3a" },
@@ -3815,7 +4005,7 @@ const GAME_CARDS = [
 ];
 const SOON_CARDS = [
   { title: "Bumper Cars", desc: "Drive a little car and bump everyone off the arena.", tint: "#2fa8ff" },
-  { title: "Treasure Hunt", desc: "Dig around the beach for buried treasure before time runs out.", tint: "#e8c07a" },
+  { title: "Sandcastle Smash", desc: "Build a sandcastle, then defend it from the waves.", tint: "#f2d58c" },
 ];
 const BLAST_SAMPLE = [
   ["start", 4, 0, 0, 0], ["target", 2, 4, 0, 2], ["target", 5, 5, 1, 2], ["target", 7, 3, 0, 2], ["target", 3, 7, 2, 2],
@@ -3867,7 +4057,7 @@ function randomArenaFor(kind, play) {
   else if (kind === "pitch") { loadList(randomPitchLayout()); rebuildKerbs(); par = null; }
   else if (kind === "bowl") { loadList(randomBowlLayout()); rebuildKerbs(); par = null; }
   else if (kind === "koth") { loadList(randomHillLayout()); kerbsDirty = true; par = null; }
-  else if (kind === "fish") { clearArena(); par = null; }
+  else if (kind === "fish" || kind === "dig") { clearArena(); par = null; }
   else if (kind === "skee") { loadList(randomSkeeLayout()); rebuildKerbs(); par = null; }
   else if (kind === "coins") { loadList(randomLayout().list); rebuildKerbs(); par = null; }
   else if (kind === "potato") { loadList(randomPlaygroundLayout().filter(t => t[0] !== "spinner")); rebuildKerbs(); par = null; }
@@ -3940,7 +4130,7 @@ function rollTwists(kind) {
   }
   return out;
 }
-const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing", coins: "Coin Dash", potato: "Potato Golf", skee: "Skee Blast" };
+const SHORT = { golf: "Golf", blast: "Blast", rush: "Robot Rush", splat: "Splat Tag", race: "Race", pitch: "Pitch Ball", bowl: "Bowling", koth: "Hill", fish: "Fishing", coins: "Coin Dash", potato: "Potato Golf", skee: "Skee Blast", dig: "Treasure Hunt" };
 function rollRandomGame() {
   transition(() => {
     stopEverything(); showHome(false);
@@ -4138,6 +4328,17 @@ function makeThumbnails() {
     camera.position.set(4, 5, 1); camera.lookAt(-0.5, 0.4, -16);
     renderer.setSize(640, 360, false); renderer.render(scene, camera);
     thumbs.fish = renderer.domElement.toDataURL("image/jpeg", 0.82);
+    for (const m of [fisher, bob, jumper]) scene.remove(m);
+    { // Treasure Hunt: a figure with a metal detector on the sand, a chest half dug up
+      const hunter = makeFigure(PLAYER_COLORS[1]); hunter.position.set(0.5, 0.03, 8); hunter.rotation.y = 0.5; scene.add(hunter);
+      const det = makeDetector(); det.position.copy(hunter.position); det.rotation.y = 0.5; scene.add(det);
+      const chest = makeTreasure(TREASURES[TREASURES.length - 1]); chest.position.set(-1.6, 0.05, 6.4); chest.rotation.y = 0.4; chest.scale.setScalar(1.5); scene.add(chest);
+      const coin = makeTreasure(TREASURES[1]); coin.position.set(1.5, 0.25, 6.6); scene.add(coin);
+      camera.position.set(2.5, 4.2, 12.5); camera.lookAt(-0.3, 0.3, 6.8);
+      renderer.render(scene, camera);
+      thumbs.dig = renderer.domElement.toDataURL("image/jpeg", 0.82);
+      for (const m of [hunter, det, chest, coin]) scene.remove(m);
+    }
     for (const o of [fisher, bob, jumper]) scene.remove(o);
     showBeach(false);
     thumbs.workshop = snapshot(SAMPLE.slice(0, 11), () => { board.visible = true; return []; });
@@ -4199,6 +4400,7 @@ function frame(now) {
   if (mode === "play" && game === "bowl") updateBowl(dt);
   if (mode === "play" && game === "koth") updateKoth(dt);
   if (mode === "play" && game === "fish") updateFish(dt);
+  if (mode === "play" && game === "dig") updateDig(dt);
   if (mode === "play" && game === "skee") { updateSkee(dt); if (aiming) drawAim(); }
   animateBeach(time);
   if (!(mode === "play" && (game === "blast" || game === "rush"))) for (const p of grid.values()) { // boards stand up outside the shooters
