@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-01T19:04+00:00",
+ "updated": "2026-11-03T04:25+00:00",
  "replies": {
   "test1101rb": {
    "status": "later",
@@ -10,6 +10,11 @@
    "status": "added",
    "reply": "Added a smiley face to the runners! Look for it on the little figures in Splat Tag, Obstacle Race and Pitch Ball.",
    "at": "2026-11-01T19:04+00:00"
+  },
+  "mw06m2v3bub0": {
+   "status": "added",
+   "reply": "Smoothed out the figure's eyes and smile so they look rounder and friendlier. Check the Splat or Race players!",
+   "at": "2026-11-03T04:25+00:00"
   }
  }
 }
