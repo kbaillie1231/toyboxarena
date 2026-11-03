@@ -11,7 +11,7 @@ inside the iPad app (which loads this website when online), and offline from the
   `{ id, word, name, desc, color, games: [...], apply: () => { ...change rule variables... } }`.
   Adding a twist is usually a one-line change; if it uses a new variable, also reset it in `resetRules()`.
 - **`GAMES`**: one entry per game, plus `GAME_HOWTO`, `SHORT`, and a card in `GAME_CARDS` (home shelf).
-  Game ids: golf, coins (Coin Dash), potato (Hot Potato Golf), skee (Skee Blast), blast, rush, splat, race, pitch, bowl, koth, fish.
+  Game ids: golf, coins (Coin Dash), potato (Hot Potato Golf), skee (Skee Blast), dig (Treasure Hunt, beach + metal detector), blast, rush, splat, race, pitch, bowl, koth, fish.
   golf, coins and potato share the putting physics (`putting()`); `SOON_CARDS` is the "Coming soon" shelf.
 - **Rainbow ball:** `rainbowOn()` / localStorage `tba-ball`; player 1's ball cycles colours. Per-player colour picking is still a bigger idea.
 - **Grid & physics:** 10×10 tiles, 2 m each, levels 0–2. `setPiece`, `surfaceAt`, `collidersNear`,
