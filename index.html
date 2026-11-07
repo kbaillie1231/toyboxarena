@@ -1096,6 +1096,7 @@ function makeDetector() { // pole, handle box and the round search coil, held ou
   g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return netTrack(g, "detector", "#2fa8ff");
 }
+function makeHole() { return new THREE.Mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshLambertMaterial({ color: "#9c7838" })); }
 function makeTreasure(t) {
   const g = new THREE.Group(), mat = (c, m = 0.5) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: 0.35 });
   if (t.id === "cap") { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 12), mat(t.color, 0.3)); g.add(c); }
@@ -1177,7 +1178,7 @@ function digNow() {
   dig.digT = 0.7;
   const [cx, cy] = coilSpot();
   burst(cx, cy, 0.2, "#e8c07a");
-  const hole = new THREE.Mesh(new THREE.CircleGeometry(0.3, 16), new THREE.MeshLambertMaterial({ color: "#9c7838" }));
+  const hole = netTrack(makeHole(), "hole", "#9c7838");
   hole.rotation.x = -Math.PI / 2; hole.position.set(cx, 0.035, -cy); scene.add(hole); dig.holes.push(hole);
   let best = null, bd = 0.75;
   for (const it of dig.items) { if (it.found) continue; const d = Math.hypot(it.x - cx, it.y - cy); if (d < bd) { bd = d; best = it; } }
@@ -3237,6 +3238,7 @@ function mirrorMake(kind, color, r) {
   if (kind === "coin") return makeCoin();
   if (kind === "potato") return makePotato();
   if (kind === "detector") return makeDetector();
+  if (kind === "hole") return makeHole();
   if (kind === "treasure") return makeTreasure(TREASURES.find(t => t.color === color) || TREASURES[0]);
   if (kind === "ring") return makeRing(color, r, 0);
   return new THREE.Group();
@@ -3257,7 +3259,9 @@ function onSnap(s) {
   aimGroup.visible = !!s.aim;
   if (s.aim) { const [x, y, z, ry, L, c] = s.aim; aimGroup.position.set(x, y, z); aimGroup.rotation.y = ry; shaft.scale.z = L; shaft.position.z = -L / 2 - BALL_R; head.position.z = -L - BALL_R - 0.2; aimMat.color.set(c); }
   time = s.tm; board.visible = !!s.bv;
-  showBeach(s.g === "fish" && s.m !== "build");
+  showBeach((s.g === "fish" || s.g === "dig") && s.m !== "build");
+  const lm = beach && beach.userData.leafMat, seeThrough = s.g === "dig" && s.m === "play"; // match the host's see-through palms
+  if (lm && lm.transparent !== seeThrough) { lm.transparent = seeThrough; lm.opacity = seeThrough ? 0.3 : 1; lm.needsUpdate = true; }
   if (s.ln) setLine(tmpA.set(s.ln[0], s.ln[1], s.ln[2]), tmpB.set(s.ln[3], s.ln[4], s.ln[5])); else fishLine.visible = false;
 }
 function mirrorFrame(dt) {
