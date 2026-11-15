@@ -91,9 +91,15 @@ body { margin: 0; background: var(--sky); color: var(--ink); font-family: var(--
 .count { display: flex; gap: 6px; }
 .count button { flex: 1; font: 400 22px var(--display); border: 0; border-radius: 12px; padding: 10px 0; background: #eef4f9; color: var(--card-ink); cursor: pointer; }
 .count button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-/* The game picker has a dozen-plus games: wrap them into two columns so every one fits on screen */
-#gamePick { display: grid; grid-template-columns: 1fr 1fr; }
-#gamePick button { font: 400 17px var(--display) !important; padding: 10px 6px; line-height: 1.15; }
+/* The game picker: a dozen-plus games as two columns of tiles, each with its own icon and colour (like the home shelf) */
+.sheet .panel:has(#gamePick) { width: min(540px, 100%); }
+#gamePick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#gamePick button { display: flex; align-items: center; gap: 10px; text-align: left; font: 400 16px/1.1 var(--display);
+  padding: 7px 10px 7px 7px; min-height: 48px; border-radius: 14px; background: var(--tl); box-shadow: inset 0 -3px 0 rgba(29,43,58,.08); }
+#gamePick .gi { width: 34px; height: 34px; flex: 0 0 auto; border-radius: 10px; display: grid; place-items: center; font-size: 19px;
+  background: var(--t); box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); }
+#gamePick button[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: 0 0 0 3px var(--t); }
+#gamePick button:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 4px); }
 table.card { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 table.card td { padding: 6px 4px; border-bottom: 1px solid #e6edf3; }
 table.card td:last-child { text-align: right; font-weight: 700; }
@@ -2731,6 +2737,7 @@ function sheet(html, wire) {
   wire(host, close);
 }
 
+const GAME_ICON = { golf: "⛳", blast: "🎯", rush: "🤖", splat: "💦", race: "🏁", pitch: "⚽", bowl: "🎳", koth: "👑", fish: "🎣", coins: "🪙", potato: "🥔", skee: "🏀", dig: "🏖️" };
 const GAME_HOWTO = {
   golf: "Drag back from your ball to putt. Fewest strokes wins.",
   blast: "Tap targets as they pop up. Most points in 30 seconds wins.",
@@ -2751,7 +2758,8 @@ function askPlayers() {
   if (!validity(game).ok) { const ok = Object.keys(GAMES).find(g => validity(g).ok); if (ok) game = ok; }
   resetRules(); // hand-built arenas play with normal rules
   sheet(`<h2 data-dismissable>What are we playing?</h2>
-    <div class="count" id="gamePick">${Object.entries(GAMES).map(([k, g]) => `<button data-g="${k}" aria-pressed="${k === game}" style="font-size:18px">${g.name}</button>`).join("")}</div>
+    <div class="count" id="gamePick">${Object.entries(GAMES).map(([k, g]) => { const t = (GAME_CARDS.find(c => c.id === k) || {}).tint || "#5ccf4f";
+      return `<button data-g="${k}" aria-pressed="${k === game}" style="--t:${t};--tl:${t}26"><span class="gi" aria-hidden="true">${GAME_ICON[k] || "🎲"}</span>${g.name}</button>`; }).join("")}</div>
     <p id="gameMsg"></p>
     <h2 style="font-size:20px">Who's playing?</h2>
     <p>Pass the phone around. Everyone takes a turn.</p>
