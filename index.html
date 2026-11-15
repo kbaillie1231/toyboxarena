@@ -91,6 +91,9 @@ body { margin: 0; background: var(--sky); color: var(--ink); font-family: var(--
 .count { display: flex; gap: 6px; }
 .count button { flex: 1; font: 400 22px var(--display); border: 0; border-radius: 12px; padding: 10px 0; background: #eef4f9; color: var(--card-ink); cursor: pointer; }
 .count button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+/* The game picker has a dozen-plus games: wrap them into two columns so every one fits on screen */
+#gamePick { display: grid; grid-template-columns: 1fr 1fr; }
+#gamePick button { font: 400 17px var(--display) !important; padding: 10px 6px; line-height: 1.15; }
 table.card { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 table.card td { padding: 6px 4px; border-bottom: 1px solid #e6edf3; }
 table.card td:last-child { text-align: right; font-weight: 700; }
