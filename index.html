@@ -1175,7 +1175,7 @@ function readyDigTurn() {
   scene.add(dig.det);
   followCam(you.x, you.y, you.z, 1, 0.72);
   sheet(`<h2>${players.length > 1 ? esc(PLAYER_NAMES[pl.i]) + "'s turn" : "Ready to hunt?"}</h2>
-    <p>Walk with your left thumb. Listen to the metal detector: the closer you get to something buried, the faster it beeps and the fuller the meter. Tap the right side to dig. Watch out for bottle caps! ${DIG_TIME} seconds.</p>
+    <p>${ctl("Walk with your left thumb.", "Walk with WASD or the arrow keys.")} Listen to the metal detector: the closer you get to something buried, the faster it beeps and the fuller the meter. ${ctl("Tap the right side to dig.", "Press Space to dig.")} Watch out for bottle caps! ${DIG_TIME} seconds.</p>
     <button class="btn primary" id="goDig">Start hunting!</button>`, (h, close) => { h.querySelector("#goDig").onclick = () => { beepInit(); close(); dig.running = true; renderHud(); }; });
   renderHud();
 }
@@ -1908,16 +1908,64 @@ function stickEnd(ev) { const st = sticks.get(ev.pointerId); if (st) { st.el.rem
 function clearSticks() { for (const st of sticks.values()) st.el.remove(); sticks.clear(); }
 // Joystick for an owner → a move direction on the ground (length 0..1), relative to the camera.
 function stickDir(owner) {
+  let dx = 0, dy = 0, m = 0;
   for (const st of sticks.values()) if (st.owner === owner) {
-    let dx = st.x - st.ox, dy = st.y - st.oy; const d = Math.hypot(dx, dy);
+    dx = st.x - st.ox; dy = st.y - st.oy; const d = Math.hypot(dx, dy);
     if (d < 8) return [0, 0];
-    const m = Math.min(1, d / 50); dx /= d; dy /= d;
-    const look = controls.target.clone().sub(camera.position); let fx = look.x, fy = -look.z; const fl = Math.hypot(fx, fy) || 1; fx /= fl; fy /= fl;
-    const rx = fy, ry = -fx; // screen right on the ground
-    return [(rx * dx + fx * -dy) * m, (ry * dx + fy * -dy) * m];
+    m = Math.min(1, d / 50); dx /= d; dy /= d; break;
   }
-  return [0, 0];
+  if (!m) { [dx, dy] = keyVec(owner); const d = Math.hypot(dx, dy); if (!d) return [0, 0]; dx /= d; dy /= d; m = 1; } // keyboard on a computer
+  const look = controls.target.clone().sub(camera.position); let fx = look.x, fy = -look.z; const fl = Math.hypot(fx, fy) || 1; fx /= fl; fy /= fl;
+  const rx = fy, ry = -fx; // screen right on the ground
+  return [(rx * dx + fx * -dy) * m, (ry * dx + fy * -dy) * m];
 }
+
+// ---- Keyboard for computers: WASD or arrow keys move, Space does the game's action (jump, dash, throw, dig).
+// Pitch Ball with two people on one computer: player 1 uses WASD, player 2 the arrow keys.
+const keysDown = new Set();
+const KEYSETS = { wasd: ["KeyW", "KeyS", "KeyA", "KeyD"], arrows: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"] };
+const onComputer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const ctl = (touch, keys) => onComputer ? keys : touch; // control hints that match the device
+function keyVec(owner) { // screen-space direction from held keys: x right, y down
+  const split = game === "pitch" && pitch && pitch.humans === 2 && !Net.online;
+  const sets = split ? [owner === 0 ? "wasd" : "arrows"] : owner === 0 ? ["wasd", "arrows"] : [];
+  let x = 0, y = 0;
+  for (const name of sets) { const [u, d, l, r] = KEYSETS[name]; if (keysDown.has(u)) y -= 1; if (keysDown.has(d)) y += 1; if (keysDown.has(l)) x -= 1; if (keysDown.has(r)) x += 1; }
+  return [x, y];
+}
+function splatThrowKey() { // Space in Splat Tag: throw at the nearest robot (leading it, like a tap on it would)
+  if (!splat || !splat.running || splat.cooldown > 0 || splat.you.stun > 0) return;
+  const y = splat.you, near = splat.bots.filter(b => !b.hidden).sort((p, q) => Math.hypot(p.x - y.x, p.y - y.y) - Math.hypot(q.x - y.x, q.y - y.y))[0];
+  if (!near) return;
+  const T = Math.max(0.42, Math.min(0.9, 0.3 + Math.hypot(near.x - y.x, near.y - y.y) / 18));
+  const t = [near.x + (near.vx + near.kx) * T, near.y + (near.vy + near.ky) * T, near.z + 0.4];
+  if (fireFrom([y.x, y.y, y.z + 0.7], t, PLAYER_COLORS[players[turn].i], "you", splat.shots)) {
+    splat.cooldown = FIRE_COOLDOWN + 0.05; players[turn].shots++;
+    y.mesh.rotation.y = Math.atan2(-(t[0] - y.x), t[1] - y.y);
+  }
+}
+function keyAction() {
+  if (Net.mirror) { // Play Together guest: send it like a tap on the right side, the host does the action
+    if (!isAvatarGame(mirror.game) || mirror.mode !== "play") return;
+    const ev = { clientX: innerWidth * 0.9, clientY: innerHeight / 2, pointerId: 999 };
+    guestPointer("down", ev); guestPointer("up", ev); return;
+  }
+  if (mode !== "play") return;
+  if (game === "race") raceJump();
+  else if (game === "koth") kothYouDash();
+  else if (game === "dig") { beepInit(); digNow(); }
+  else if (game === "splat") splatThrowKey();
+}
+addEventListener("keydown", (e) => {
+  if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; // typing a name or an idea
+  const moveKey = KEYSETS.wasd.includes(e.code) || KEYSETS.arrows.includes(e.code);
+  const playing = mode === "play" || Net.mirror;
+  if ((moveKey || e.code === "Space") && playing && !$("sheetHost").innerHTML) e.preventDefault(); // no page scrolling mid-game
+  if (moveKey) keysDown.add(e.code);
+  if ((e.code === "Space" || e.code === "Enter") && !e.repeat && !$("sheetHost").innerHTML) keyAction();
+});
+addEventListener("keyup", (e) => keysDown.delete(e.code));
+addEventListener("blur", () => keysDown.clear()); // let go of everything if the window loses focus
 
 // A foam shot from anywhere (players in Splat Tag, bots too). Same lob as the blaster.
 function fireFrom(o, target, color, owner, list) {
@@ -1994,7 +2042,7 @@ function readySplatTurn() {
   for (const b of splat.bots) { const [x, y, z] = randomCellAway(sx, sy, 6); Object.assign(b, { x, y, z, vx: 0, vy: 0, kx: 0, ky: 0, hidden: false, dead: 0 }); }
   splat.timeLeft = SPLAT_TIME; splat.running = false;
   sheet(`<h2>${players.length > 1 ? PLAYER_NAMES[pl.i] + "'s turn" : "Ready?"}</h2>
-    <p>Left thumb: run. Tap anywhere else: throw a splat. Splat robots for points, but they throw back! ${SPLAT_TIME} seconds.</p>
+    <p>${ctl("Left thumb: run. Tap anywhere else: throw a splat.", "WASD or arrow keys: run. Space throws at the nearest robot, or click to aim.")} Splat robots for points, but they throw back! ${SPLAT_TIME} seconds.</p>
     <button class="btn primary" id="goSplat">Go!</button>`, (h, close) => { h.querySelector("#goSplat").onclick = () => { close(); splat.running = true; renderHud(); }; });
   renderHud();
 }
@@ -2109,7 +2157,7 @@ function readyRaceTurn() {
   removeAvatar(race.you); race.you = newAvatar(PLAYER_COLORS[pl.i], sx, sy, st.lvl + TOP);
   race.t = 0; race.running = false;
   sheet(`<h2>${players.length > 1 ? PLAYER_NAMES[pl.i] + "'s run" : "Ready?"}</h2>
-    <p>Left thumb: run. Tap the right side (or Jump): jump. Get to the flag as fast as you can. Fall off and you go back a step.</p>
+    <p>${ctl("Left thumb: run. Tap the right side (or Jump): jump.", "WASD or arrow keys: run. Space: jump.")} Get to the flag as fast as you can. Fall off and you go back a step.</p>
     <button class="btn primary" id="goRace">Go!</button>`, (h, close) => { h.querySelector("#goRace").onclick = () => { close(); race.running = true; renderHud(); }; });
   renderHud();
 }
@@ -2196,7 +2244,7 @@ function startPitch() {
   pitchKickoff();
   setMode("play");
   sheet(`<h2>Pitch Ball</h2>
-    <p>${pitch.humans === 2 ? "Blue uses the left half of the screen, Pink uses the right half." : "Use your thumb anywhere to run."} Run into the ball to kick it. First to ${GOALS_TO_WIN} goal${GOALS_TO_WIN > 1 ? "s" : ""} wins.</p>
+    <p>${pitch.humans === 2 ? ctl("Blue uses the left half of the screen, Pink uses the right half.", "Blue uses WASD, Pink uses the arrow keys.") : ctl("Use your thumb anywhere to run.", "Use WASD or the arrow keys to run.")} Run into the ball to kick it. First to ${GOALS_TO_WIN} goal${GOALS_TO_WIN > 1 ? "s" : ""} wins.</p>
     <button class="btn primary" id="goPitch">Kick off!</button>`, (h, close) => { h.querySelector("#goPitch").onclick = () => { close(); pitch.running = true; renderHud(); }; });
 }
 function pitchKickoff() {
@@ -2615,7 +2663,7 @@ function renderHud() {
   if (mode === "play" && game === "dig") {
     top.innerHTML = chips(p => p.score);
     const cur = players[turn], secs = dig ? Math.max(0, Math.ceil(dig.timeLeft)) : 0;
-    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="width:min(420px,88vw);padding:10px 12px;display:grid;gap:6px"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px"><span>📡 Metal detector</span><span id="detPct">0%</span></div><div style="height:22px;border-radius:11px;background:#e6edf3;overflow:hidden"><div id="detBar" style="height:100%;width:0%;background:var(--go);border-radius:11px"></div></div></div><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} · ${cur.score} pts · ${cur.finds.length} found` : ""}</div>${hint("Left thumb: walk · tap the right side: dig")}</div>`;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="width:min(420px,88vw);padding:10px 12px;display:grid;gap:6px"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px"><span>📡 Metal detector</span><span id="detPct">0%</span></div><div style="height:22px;border-radius:11px;background:#e6edf3;overflow:hidden"><div id="detBar" style="height:100%;width:0%;background:var(--go);border-radius:11px"></div></div></div><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} · ${cur.score} pts · ${cur.finds.length} found` : ""}</div>${hint(ctl("Left thumb: walk · tap the right side: dig", "WASD or arrow keys: walk · Space: dig"))}</div>`;
     return;
   }
   if (mode === "play" && game === "skee") {
@@ -2635,7 +2683,7 @@ function renderHud() {
   if (mode === "play" && game === "koth") {
     top.innerHTML = chips(p => p.score.toFixed(0) + "s");
     const cur = players[turn], secs = koth ? Math.max(0, Math.ceil(koth.timeLeft)) : 0;
-    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}0:${String(secs).padStart(2, "0")} · 👑 ${cur.score.toFixed(1)}s on top` : ""}</div>${hint("Left thumb: run · tap right side: dash and shove")}</div>`;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? esc(PLAYER_NAMES[cur.i]) + " · " : ""}0:${String(secs).padStart(2, "0")} · 👑 ${cur.score.toFixed(1)}s on top` : ""}</div>${hint(ctl("Left thumb: run · tap right side: dash and shove", "WASD or arrow keys: run · Space: dash and shove"))}</div>`;
     return;
   }
   if (mode === "play" && game === "fish") {
@@ -2658,13 +2706,13 @@ function renderHud() {
   if (mode === "play" && game === "splat") {
     top.innerHTML = chips(p => p.score);
     const cur = players[turn], secs = splat ? Math.max(0, Math.ceil(splat.timeLeft)) : 0;
-    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}0:${String(secs).padStart(2, "0")} · ${cur.score} splats` : ""}</div>${hint("Left thumb: run · tap: throw")}</div>`;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}0:${String(secs).padStart(2, "0")} · ${cur.score} splats` : ""}</div>${hint(ctl("Left thumb: run · tap: throw", "WASD or arrow keys: run · Space or click: throw"))}</div>`;
     return;
   }
   if (mode === "play" && game === "race") {
     top.innerHTML = chips(p => p.time != null ? fmtTime(p.time) : p.done ? "DNF" : "–");
     const cur = players[turn];
-    bottom.innerHTML = `<div class="bar" style="flex-direction:column;width:100%"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}${fmtTime(race ? race.t : 0)}` : ""}</div>${hint("Left thumb: run · right side: jump")}</div>
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column;width:100%"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${cur ? `${players.length > 1 ? PLAYER_NAMES[cur.i] + " · " : ""}${fmtTime(race ? race.t : 0)}` : ""}</div>${hint(ctl("Left thumb: run · right side: jump", "WASD or arrow keys: run · Space: jump"))}</div>
       <button id="jumpBtn" aria-label="Jump" style="position:fixed;right:calc(18px + env(safe-area-inset-right, 0px));bottom:calc(26px + env(safe-area-inset-bottom, 0px));width:96px;height:96px;border-radius:50%;border:0;background:#ffd23f;color:#1d2b3a;font:400 22px var(--display);box-shadow:0 5px 0 #c9a21c;pointer-events:auto">Jump</button>`;
     const jb = $("jumpBtn"); jb.addEventListener("pointerdown", (e) => { e.preventDefault(); raceJump(); });
     return;
@@ -2672,7 +2720,7 @@ function renderHud() {
   if (mode === "play" && game === "pitch") {
     top.innerHTML = pitch ? `<div class="scores"><div class="chip"><b style="background:${TEAM[0].color}"></b>${pitch.score[0]}</div><div class="chip"><b style="background:${TEAM[1].color}"></b>${pitch.score[1]}</div></div>` : "";
     const secs = pitch ? Math.max(0, Math.ceil(pitch.timeLeft)) : 0;
-    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} · first to ${GOALS_TO_WIN}</div>${hint(pitch && Net.online && pitch.humans === 2 ? `${esc(PLAYER_NAMES[0])} (Blue) vs ${esc(PLAYER_NAMES[1])} (Pink) · thumb anywhere to run` : pitch && pitch.humans === 2 ? "Blue: left half · Pink: right half" : "Thumb anywhere to run")}</div>`;
+    bottom.innerHTML = `<div class="bar" style="flex-direction:column"><div class="panel" style="font-weight:700;font-variant-numeric:tabular-nums">${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} · first to ${GOALS_TO_WIN}</div>${hint(pitch && Net.online && pitch.humans === 2 ? `${esc(PLAYER_NAMES[0])} (Blue) vs ${esc(PLAYER_NAMES[1])} (Pink) · thumb anywhere to run` : pitch && pitch.humans === 2 ? ctl("Blue: left half · Pink: right half", "Blue: WASD · Pink: arrow keys") : ctl("Thumb anywhere to run", "WASD or arrow keys to run"))}</div>`;
     return;
   }
   if (mode === "play" && game === "rush") {
@@ -3579,7 +3627,7 @@ function readyKothTurn() {
   for (let k = 0; k < 3; k++) { const [bx, by, bz] = lowCell(); koth.bots.push(newAvatar(ROBOT_COLORS[k], bx, by, bz, { robot: true, r: 0.32, dashT: 0, dashCd: 1 + Math.random() * 2, crown: 0 })); }
   koth.timeLeft = KOTH_TIME; koth.running = false;
   sheet(`<h2>${players.length > 1 ? esc(PLAYER_NAMES[pl.i]) + "'s turn" : "Ready?"}</h2>
-    <p>Left thumb: run. Tap the right side: dash and shove. Stand on the very top to score. ${KOTH_TIME} seconds.</p>
+    <p>${ctl("Left thumb: run. Tap the right side: dash and shove.", "WASD or arrow keys: run. Space: dash and shove.")} Stand on the very top to score. ${KOTH_TIME} seconds.</p>
     <button class="btn primary" id="goKoth">Go!</button>`, (h, close) => { h.querySelector("#goKoth").onclick = () => { close(); koth.running = true; renderHud(); }; });
   renderHud();
 }
