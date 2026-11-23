@@ -266,8 +266,8 @@ const TWISTS = [
   { id: "windy", word: "Windy", name: "Windy", desc: "A steady wind pushes every shot.", color: "#6b7f92", games: ["golf", "coins", "skee", "blast", "rush", "splat"],
     apply: () => { const a = Math.random() * Math.PI * 2; WIND = [Math.cos(a) * 1.6, Math.sin(a) * 1.6]; } },
   { id: "rocket", word: "Rocket", name: "Rocket putts", desc: "Shots go 60% faster.", color: "#ff3b3b", games: ["golf", "coins", "potato"], apply: () => { SHOT_MULT = 1.6; } },
-  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over.", skee: "Only 5 balls each.", dig: "Just 45 seconds to dig.", street: "Only 15 seconds to hop forward." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato", "skee", "dig", "street"],
-    apply: () => { HURRY_TIME = 15; DIG_TIME = 45; SKEE_BALLS = 5; COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
+  { id: "short", word: "Sudden-Death", name: "Sudden death", desc: { golf: "Only 4 strokes, then you're out.", blast: "Just 15 seconds each.", rush: "Only 1 life for the whole team.", splat: "Just 30 seconds each.", race: "Finish in 45 seconds or you're out.", pitch: "Next goal wins.", bowl: "Only 3 frames.", koth: "Only 25 seconds on the hill.", fish: "The shortest round: 3 minutes.", coins: "Only 3 shots each.", potato: "One pop and it's over.", skee: "Only 5 balls each.", dig: "Just 45 seconds to dig.", street: "Only 8 seconds to hop forward." }, color: "#1d2b3a", games: ["golf", "blast", "rush", "splat", "race", "pitch", "bowl", "koth", "fish", "coins", "potato", "skee", "dig", "street"],
+    apply: () => { HURRY_TIME = 8; DIG_TIME = 45; SKEE_BALLS = 5; COIN_SHOTS = 3; POTATO_POPS = 1; MAX_STROKES = 4; BLAST_TIME = 15; LIVES = 1; SPLAT_TIME = 30; RACE_LIMIT = 45; GOALS_TO_WIN = 1; BOWL_FRAMES = 3; KOTH_TIME = 25; FISH_TIME = 180; } },
   { id: "speedy", word: "Speedy", name: "Speedy targets", desc: "Targets pop up and drop twice as fast.", color: "#ffd23f", games: ["blast"], apply: () => { TARGET_SPEED = 1.9; } },
   { id: "big", word: "Big-Target", name: "Big targets", desc: "Targets are easier to hit.", color: "#5ccf4f", games: ["blast"], apply: () => { TARGET_SIZE = 1.5; } },
   { id: "rapid", word: "Rapid-Fire", name: "Rapid fire", desc: "The blaster fires three times as fast.", color: "#ff8a3d", games: ["blast", "rush", "splat"], apply: () => { FIRE_COOLDOWN = 0.07; } },
@@ -288,7 +288,7 @@ function resetRules() {
   BALL_R = 0.15; G = 9.8; FRICTION = 1; BOUNCE = 1; WIND = [0, 0]; SHOT_MULT = 1; MAX_STROKES = 10;
   BLAST_TIME = 30; FIRE_COOLDOWN = 0.22; TARGET_SPEED = 1; TARGET_SIZE = 1; ROBOT_SPEED = 1; ROBOT_COUNT = 1; LIVES = 3;
   AVATAR_SPEED = 1; FRICTION_AV = 1; BOT_COUNT = 3; SPLAT_TIME = 60; RACE_LIMIT = 90; GOALS_TO_WIN = 3; PITCH_BALL_R = 0.45; JUMP_MULT = 1;
-  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; SKEE_BALLS = 9; DIG_TIME = 90; DET_RANGE = 1; HURRY_TIME = 30; TRAFFIC = 1; LUCKY = 0; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
+  BOWL_FRAMES = 5; KOTH_TIME = 45; COIN_SHOTS = 5; POTATO_POPS = 3; SKEE_BALLS = 9; DIG_TIME = 90; DET_RANGE = 1; HURRY_TIME = 15; TRAFFIC = 1; LUCKY = 0; FISH_BITE = [10, 45]; FISH_BIG = 1; FISH_TIME = fishMinutes * 60;
   activeTwists = [];
 }
 function applyTwists(list) { resetRules(); activeTwists = list; for (const t of list) t.apply(); }
@@ -1254,7 +1254,7 @@ function updateDig(dt) {
 // phone. Score = rows crossed + coins. The town is made of rows; each row is one mesh built from a short text
 // ("y|type|cells") so the Play Together guest can build the same row from the snapshot.
 // ---------------------------------------------------------------------------
-let HURRY_TIME = 30, TRAFFIC = 1, LUCKY = 0, street = null;
+let HURRY_TIME = 15, TRAFFIC = 1, LUCKY = 0, street = null;
 const ST_W = 6, ST_EDGE = 11; // you can hop in columns -6..6; the town is drawn out to ±11
 const POWERS = {
   shield: { name: "Bubble Shield", icon: "🫧", color: "#7fd3ff", dur: 0, desc: "blocks one bump" },
@@ -1365,6 +1365,20 @@ function makePow(id) { // a floating bubble with the power-up's picture in it
   const bub = new THREE.Mesh(new THREE.SphereGeometry(0.42, 18, 12), new THREE.MeshStandardMaterial({ color: p.color, transparent: true, opacity: 0.35, roughness: 0.1 })); g.add(bub);
   return g;
 }
+function makeSweeper() { // big yellow street sweeper: striped, a flashing orange light on top, spinning brushes
+  const g = new THREE.Group(), L = 2.8;
+  g.add(stBox(L, 0.6, 0.95, "#ffd23f", 0, 0.42, 0), stBox(0.9, 0.75, 0.9, "#ffd23f", L / 2 - 0.5, 1.1, 0), stBox(0.04, 0.4, 0.8, "#bfe6ff", L / 2 - 0.04, 1.2, 0));
+  for (let k = 0; k < 4; k++) { const st = stBox(0.16, 0.62, 0.97, "#1d2b3a", -L / 2 + 0.35 + k * 0.42, 0.42, 0); st.rotation.z = 0.5; g.add(st); }
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.17, 12, 8), new THREE.MeshBasicMaterial({ color: "#ff6a00" })); beacon.position.set(L / 2 - 0.5, 1.6, 0); g.add(beacon);
+  g.add(stBox(0.3, 0.06, 0.3, "#1d2b3a", L / 2 - 0.5, 1.48, 0));
+  const brushes = [];
+  for (const sz of [-0.42, 0.42]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 10), stMat("#ff3b3b")); b.position.set(L / 2 + 0.1, 0.08, sz); g.add(b); brushes.push(b); }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 12), stMat("#1d2b3a")); w.rotation.x = Math.PI / 2; w.position.set(sx * (L / 2 - 0.45), 0.2, sz * 0.48); g.add(w); }
+  g.scale.setScalar(1.15);
+  g.userData.beacon = beacon; g.userData.brushes = brushes;
+  return g;
+}
+function stRemoveSweeper(s) { if (s && s.sweeper) { scene.remove(s.sweeper.mesh); scene.remove(s.sweeper.warn); s.sweeper = null; } }
 function makeBubble() { return new THREE.Mesh(new THREE.SphereGeometry(0.62, 20, 14), new THREE.MeshStandardMaterial({ color: "#7fd3ff", transparent: true, opacity: 0.28, roughness: 0.05, depthWrite: false })); }
 
 // ---- The town: rows made on the fly ahead of you and removed behind you ----
@@ -1447,7 +1461,8 @@ function stopStreet() {
   if (!street) return;
   for (const row of [...street.rows.values()]) stRemoveRow(row);
   if (street.you) removeAvatar(street.you);
-  for (const m of [street.bubble, street.sweeper && street.sweeper.mesh, ...street.pops.map(p => p.mesh)]) if (m) scene.remove(m);
+  stRemoveSweeper(street);
+  for (const m of [street.bubble, ...street.pops.map(p => p.mesh)]) if (m) scene.remove(m);
   street = null;
 }
 function newTown(withPlayer) {
@@ -1505,7 +1520,7 @@ function stTryHop(dx, dy) {
   beep(s.hop.big ? 520 : 760, 0.035, 0.025, "triangle");
   if (ty > s.best) { // a new row: the hurry-up timer starts again
     s.best = ty; s.hurry = HURRY_TIME;
-    if (s.sweeper) { scene.remove(s.sweeper.mesh); s.sweeper = null; }
+    stRemoveSweeper(s);
     stKeepRows();
   }
   renderHud();
@@ -1554,7 +1569,7 @@ function stHit(car) { // a car (or the sweeper) got you
     if (s.bubble) { scene.remove(s.bubble); s.bubble = null; s.inv = 1.5; s.you.flash = 1.5; toast("Pop! Your bubble saved you"); burst(s.ax, s.ay, 0.6, "#7fd3ff"); beep(900, 0.1, 0.05, "sine"); renderHud(); return; }
   }
   burst(s.ax, s.ay, 0.5, PLAYER_COLORS[players[turn].i]);
-  if (car.sweeper) { scene.remove(s.sweeper.mesh); s.sweeper = null; s.hurry = HURRY_TIME; }
+  if (car.sweeper) { stRemoveSweeper(s); s.hurry = HURRY_TIME; }
   s.lives--;
   beep(120, 0.3, 0.07, "sawtooth");
   if (s.lives > 0) { s.inv = 2; s.you.flash = 2; toast(car.sweeper ? "The street sweeper got you! Keep hopping forward!" : `Bonk! ${s.lives} ${s.lives === 1 ? "life" : "lives"} left`); renderHud(); return; }
@@ -1599,14 +1614,19 @@ function updateStreet(dt) {
     // Hurry up: no new row for a while and the street sweeper comes along your row
     const before = Math.ceil(s.hurry); s.hurry -= dt; if (Math.ceil(s.hurry) !== before) renderHud();
     if (s.hurry <= 0 && !s.sweeper) {
-      const side = s.px > 0 ? -1 : 1, mesh = netTrack(makeCar("#ff8a3d", 2.6), "car", "#ff8a3d", 2.6);
-      s.sweeper = { x: side * -16, dir: side, mesh, sweeper: true, len: 2.6 }; mesh.rotation.y = side > 0 ? 0 : Math.PI; scene.add(mesh);
+      const side = s.px > 0 ? -1 : 1, mesh = netTrack(makeSweeper(), "sweeper", "#ffd23f", 2.8);
+      const warn = netTrack(new THREE.Mesh(new THREE.PlaneGeometry(ST_W * 2 + 1, 1), new THREE.MeshBasicMaterial({ color: "#ff3b3b", transparent: true, opacity: 0.45, depthWrite: false })), "sweepwarn", "#ff3b3b");
+      warn.rotation.x = -Math.PI / 2; scene.add(warn);
+      s.sweeper = { x: side * -8.5, dir: side, mesh, warn, sweeper: true, len: 2.8, t: 0 }; mesh.rotation.y = side > 0 ? 0 : Math.PI; scene.add(mesh);
       toast("Honk honk! The street sweeper is coming. Hop forward!"); beep(240, 0.4, 0.06, "square"); setTimeout(() => beep(240, 0.4, 0.06, "square"), 450);
     }
     if (s.sweeper) {
-      const sw = s.sweeper; sw.x += sw.dir * 9 * dt; sw.mesh.position.set(sw.x, 0, -s.py);
+      const sw = s.sweeper; sw.t += dt;
+      sw.x += sw.dir * (sw.t < 1.5 ? 1.2 : 3.5) * dt; sw.mesh.position.set(sw.x, 0, -s.py); // creeps in slowly at first so you can see it
+      sw.warn.position.set(0, 0.03, -s.py); sw.warn.visible = Math.floor(sw.t * 5) % 2 === 0; // your row flashes red
+      const ud = sw.mesh.userData; ud.beacon.visible = Math.floor(sw.t * 6) % 2 === 0; ud.brushes.forEach(b => b.rotation.y += dt * 14);
       if (Math.abs(sw.x - s.ax) < sw.len / 2 + 0.25 && !s.hop) stHit(sw);
-      else if (Math.abs(sw.x) > 17) { scene.remove(sw.mesh); s.sweeper = null; s.hurry = 5; } // missed: it comes back soon
+      else if (Math.abs(sw.x) > 17) { stRemoveSweeper(s); s.hurry = 5; } // missed: it comes back soon
     }
     // Cars on your row
     const row = s.rows.get(s.py);
@@ -3224,7 +3244,7 @@ const GAME_HOWTO = {
   koth: "Stay on the very top to score. Tap the right side to dash and shove the robots off.",
   fish: "Drag back to cast. When a fish bites, tap fast, then hold to reel. Most fish wins.",
   coins: "Putt over coins to grab them. 5 shots each, and a hole is worth 3 coins. Most coins wins.",
-  street: "Hop across the roads without getting bonked. Search bushes and fridges for hidden power-ups. Hop forward every 30 seconds!",
+  street: "Hop across the roads without getting bonked. Search bushes and fridges for hidden power-ups. Hop forward every 15 seconds!",
   dig: "Walk the beach with your metal detector. The closer you get to buried treasure, the faster it beeps. Tap to dig!",
   skee: "Drag back and let go to lob the ball into the rings. Higher, smaller rings score more. 9 balls each.",
   potato: "One ball has the ticking potato. Putt into another ball to pass it before it pops! Fewest pops wins.",
@@ -3738,6 +3758,8 @@ function mirrorMake(kind, color, r) {
   if (kind === "car") return makeCar(color, r || 1.35);
   if (kind === "pow") return makePow(color);
   if (kind === "bubble") return makeBubble();
+  if (kind === "sweeper") return makeSweeper();
+  if (kind === "sweepwarn") { const m = new THREE.Mesh(new THREE.PlaneGeometry(ST_W * 2 + 1, 1), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.45, depthWrite: false })); m.rotation.x = -Math.PI / 2; return m; }
   return new THREE.Group();
 }
 function onSnap(s) {
